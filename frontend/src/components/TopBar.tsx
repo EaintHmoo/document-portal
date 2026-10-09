@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Bell, Menu, ChevronDown, Upload, Check, X, FileText, Download } from 'lucide-react';
+import { Search, Bell, Menu, ChevronDown, Check, X, FileText, Download } from 'lucide-react';
 import type { DisplayUser } from '../types';
 
 interface TopbarProps {
@@ -43,11 +43,6 @@ export default function Topbar({ user, onMobileMenuClick, onSignOut }: TopbarPro
 
         {/* Right: Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Upload button */}
-          <button className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-slate-800 hover:bg-slate-900 rounded-lg transition-colors shadow-sm active:scale-[0.98]">
-            <Upload className="w-4 h-4" />
-            <span className="hidden md:inline">Upload</span>
-          </button>
 
           {/* Notifications */}
           <div className="relative">

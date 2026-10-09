@@ -22,5 +22,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::before(fn (User $user) => $user->isAdmin() ? true : null);
+
+        // Admins pass via Gate::before above; everyone else is denied — only
+        // admins may view the system-wide activity history (spec §7).
+        Gate::define('viewActivityLog', fn (User $user) => false);
     }
 }

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { AlertCircle, Upload } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import FolderListPage from '../components/FolderListPage';
 import FolderFormModal, { type FolderFormData } from '../components/FolderFormModal';
@@ -86,18 +86,6 @@ export default function FoldersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex-1" />
-        <button
-          onClick={() => setModal({ type: 'upload' })}
-          disabled={folders.length === 0}
-          className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold text-white bg-slate-800 hover:bg-slate-900 rounded-lg transition-all shadow-sm active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <Upload className="w-4 h-4" />
-          Upload Document
-        </button>
-      </div>
-
       {loading ? (
         <LoadingScreen />
       ) : error ? (
@@ -110,6 +98,7 @@ export default function FoldersPage() {
         <FolderListPage
           role={user.role}
           folders={folders}
+          onUploadDocument={() => setModal({ type: 'upload'})}
           onNewFolder={() => setModal({ type: 'create' })}
           onEditFolder={(folder) => setModal({ type: 'edit', folder })}
           onDeleteFolder={(folder) => setModal({ type: 'delete', folder })}

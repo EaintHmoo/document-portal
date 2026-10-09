@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentController;
@@ -14,6 +15,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'me']);
 
     Route::get('/dashboard', [DashboardController::class, 'index']);
+
+    Route::get('/activity-logs', [ActivityLogController::class, 'index']);
 
     Route::apiResource('folders', FolderController::class)->parameters(['folders' => 'folder']);
     Route::get('/folders/{folder}/access', [FolderController::class, 'access']);

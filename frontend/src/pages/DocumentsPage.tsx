@@ -1,173 +1,182 @@
-import { useEffect, useState } from 'react';
-import { AlertCircle, ChevronLeft, ChevronRight, Search, X } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { AlertCircle } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
-import DocumentTable from '../components/DocumentTable';
-import LoadingScreen from '../components/LoadingScreen';
-import { fetchDocuments, type ApiDocument } from '../api/documents';
-import { fetchFolders, type ApiFolder } from '../api/folders';
+import DocumentListPage from '../components/DocumentListPage';
+import EditDocumentModal, { type EditDocumentData } from '../components/EditDocumentModal';
+import DeleteDocumentModal from '../components/DeleteDocumentModal';
+import UploadDocumentModal, { type UploadDocumentData } from '../components/UploadDocumentModal';
+import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../api/client';
+import {
+  fetchDocuments, uploadDocument, updateDocument, deleteDocument, getDownloadUrl,
+  type ApiDocument, type DocumentListParams,
+} from '../api/documents';
+import { fetchFolders, type ApiFolder } from '../api/folders';
+
+type ModalState =
+  | { type: 'none' }
+  | { type: 'edit'; doc: ApiDocument }
+  | { type: 'delete'; doc: ApiDocument }
+  | { type: 'upload' };
 
 export default function DocumentsPage() {
+  const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
-  const folderId = searchParams.get('folder_id') ?? undefined;
+
+  const folderIdParam = searchParams.get('folder_id');
   const q = searchParams.get('q') ?? '';
+  const extension = searchParams.get('extension') ?? 'all';
+  const sort = (searchParams.get('sort') as DocumentListParams['sort']) ?? 'newest';
   const page = Number(searchParams.get('page') ?? '1');
 
-  const [searchInput, setSearchInput] = useState(q);
   const [documents, setDocuments] = useState<ApiDocument[]>([]);
-  const [meta, setMeta] = useState<{ current_page: number; last_page: number; total: number } | null>(null);
-  const [folder, setFolder] = useState<ApiFolder | null>(null);
+  const [meta, setMeta] = useState<{ current_page: number; last_page: number; total: number }>({
+    current_page: 1, last_page: 1, total: 0,
+  });
+  const [folders, setFolders] = useState<ApiFolder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [modal, setModal] = useState<ModalState>({ type: 'none' });
 
-  useEffect(() => {
-    setSearchInput(q);
-  }, [q]);
-
-  useEffect(() => {
-    let cancelled = false;
+  const load = useCallback(() => {
     setLoading(true);
     setError(null);
 
-    fetchDocuments({
-      folder_id: folderId ? Number(folderId) : undefined,
+    return fetchDocuments({
+      folder_id: folderIdParam ? Number(folderIdParam) : undefined,
       q: q || undefined,
+      extension: extension === 'all' ? undefined : extension,
+      sort,
       page,
     })
       .then((res) => {
-        if (cancelled) return;
         setDocuments(res.data);
         setMeta(res.meta);
       })
       .catch((err) => {
-        if (!cancelled) {
-          setError(err instanceof ApiError ? err.message : 'Could not load documents. Please try again.');
-        }
+        setError(err instanceof ApiError ? err.message : 'Could not load documents. Please try again.');
       })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [folderId, q, page]);
+      .finally(() => setLoading(false));
+  }, [folderIdParam, q, extension, sort, page]);
 
   useEffect(() => {
-    if (!folderId) {
-      setFolder(null);
-      return;
+    load();
+  }, [load]);
+
+  useEffect(() => {
+    fetchFolders().then(setFolders).catch(() => {
+      // Non-critical — filters/upload destination list just won't populate.
+    });
+  }, []);
+
+  const updateParams = (patch: Record<string, string | undefined>, resetPage = true) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      for (const [key, value] of Object.entries(patch)) {
+        if (value === undefined || value === 'all' || value === '') next.delete(key);
+        else next.set(key, value);
+      }
+      if (resetPage) next.delete('page');
+      return next;
+    });
+  };
+
+  if (!user) return null;
+
+  const handleDownload = async (doc: ApiDocument) => {
+    try {
+      const { download_url } = await getDownloadUrl(doc.uuid);
+      window.open(download_url, '_blank', 'noopener,noreferrer');
+    } catch {
+      // Not worth a blocking error banner — the user can just try again.
     }
+  };
 
-    let cancelled = false;
-    fetchFolders()
-      .then((folders) => {
-        if (!cancelled) setFolder(folders.find((f) => String(f.id) === folderId) ?? null);
-      })
-      .catch(() => {
-        // Non-critical — the filter still works even if we can't resolve the folder's name for the chip.
+  const handleEdit = async (data: EditDocumentData) => {
+    if (modal.type !== 'edit') return;
+    await updateDocument(modal.doc.uuid, data);
+    await load();
+  };
+
+  const handleDelete = async () => {
+    if (modal.type !== 'delete') return;
+    try {
+      await deleteDocument(modal.doc.uuid);
+    } catch (err) {
+      throw new Error(err instanceof ApiError ? err.message : 'Could not delete this document. Please try again.');
+    }
+    await load();
+  };
+
+  const handleUpload = async (data: UploadDocumentData) => {
+    try {
+      await uploadDocument({
+        folder_id: data.folderId,
+        title: data.title,
+        description: data.description || undefined,
+        file: data.file,
       });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [folderId]);
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      if (searchInput) next.set('q', searchInput);
-      else next.delete('q');
-      next.delete('page');
-      return next;
-    });
+    } catch (err) {
+      throw new Error(err instanceof ApiError ? err.message : 'Could not upload this document. Please try again.');
+    }
+    await load();
   };
 
-  const clearFolderFilter = () => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      next.delete('folder_id');
-      return next;
-    });
-  };
-
-  const goToPage = (nextPage: number) => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      next.set('page', String(nextPage));
-      return next;
-    });
-  };
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center gap-3">
+        <AlertCircle className="w-8 h-8 text-rose-400" />
+        <p className="text-[14px] font-semibold text-slate-700">Couldn't load documents</p>
+        <p className="text-[13px] text-slate-400 max-w-sm">{error}</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-bold text-slate-800 tracking-tight">Documents</h1>
-        <p className="text-[13px] text-slate-400 mt-0.5">Search and browse every document you have access to</p>
-      </div>
+    <>
+      <DocumentListPage
+        role={user.role}
+        documents={documents}
+        folders={folders}
+        loading={loading}
+        total={meta.total}
+        page={meta.current_page}
+        lastPage={meta.last_page}
+        onPageChange={(p) => updateParams({ page: String(p) }, false)}
+        search={q}
+        onSearchChange={(value) => updateParams({ q: value })}
+        folderFilter={folderIdParam ? Number(folderIdParam) : 'all'}
+        onFolderFilterChange={(value) => updateParams({ folder_id: value === 'all' ? undefined : String(value) })}
+        extensionFilter={extension}
+        onExtensionFilterChange={(value) => updateParams({ extension: value })}
+        sort={sort ?? 'newest'}
+        onSortChange={(value) => updateParams({ sort: value }, false)}
+        onUpload={() => setModal({ type: 'upload' })}
+        onEdit={(doc) => setModal({ type: 'edit', doc })}
+        onDelete={(doc) => setModal({ type: 'delete', doc })}
+        onDownload={handleDownload}
+      />
 
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-        <form onSubmit={handleSearchSubmit} className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
-            type="text"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Search documents..."
-            className="w-full pl-9 pr-4 py-2 text-sm bg-white border border-slate-200 rounded-lg placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100 outline-none transition-all"
-          />
-        </form>
+      <EditDocumentModal
+        open={modal.type === 'edit'}
+        onClose={() => setModal({ type: 'none' })}
+        document={modal.type === 'edit' ? modal.doc : null}
+        onSave={handleEdit}
+      />
 
-        {folder && (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg">
-            Folder: {folder.name}
-            <button onClick={clearFolderFilter} className="text-slate-400 hover:text-slate-700">
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </span>
-        )}
-      </div>
+      <DeleteDocumentModal
+        open={modal.type === 'delete'}
+        onClose={() => setModal({ type: 'none' })}
+        document={modal.type === 'delete' ? modal.doc : null}
+        onConfirm={handleDelete}
+      />
 
-      {loading ? (
-        <LoadingScreen />
-      ) : error ? (
-        <div className="flex flex-col items-center justify-center py-24 text-center gap-3">
-          <AlertCircle className="w-8 h-8 text-rose-400" />
-          <p className="text-[14px] font-semibold text-slate-700">Couldn't load documents</p>
-          <p className="text-[13px] text-slate-400 max-w-sm">{error}</p>
-        </div>
-      ) : (
-        <>
-          <DocumentTable
-            documents={documents}
-            title="All Documents"
-            subtitle={meta ? `${meta.total} document${meta.total === 1 ? '' : 's'}` : ''}
-          />
-
-          {meta && meta.last_page > 1 && (
-            <div className="flex items-center justify-between">
-              <button
-                onClick={() => goToPage(meta.current_page - 1)}
-                disabled={meta.current_page <= 1}
-                className="flex items-center gap-1 px-3 py-1.5 text-[13px] font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              >
-                <ChevronLeft className="w-4 h-4" /> Previous
-              </button>
-              <span className="text-[13px] text-slate-400">
-                Page {meta.current_page} of {meta.last_page}
-              </span>
-              <button
-                onClick={() => goToPage(meta.current_page + 1)}
-                disabled={meta.current_page >= meta.last_page}
-                className="flex items-center gap-1 px-3 py-1.5 text-[13px] font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              >
-                Next <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          )}
-        </>
-      )}
-    </div>
+      <UploadDocumentModal
+        open={modal.type === 'upload'}
+        onClose={() => setModal({ type: 'none' })}
+        folders={folders.map((f) => ({ id: f.id, name: f.name }))}
+        onUpload={handleUpload}
+      />
+    </>
   );
 }

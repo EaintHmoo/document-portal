@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Repositories\ActivityLog\ActivityLogRepository;
+use App\Repositories\ActivityLog\ActivityLogRepositoryInterface;
 use App\Repositories\Dashboard\DashboardRepository;
 use App\Repositories\Dashboard\DashboardRepositoryInterface;
 use App\Repositories\Document\DocumentRepository;
@@ -20,5 +22,6 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(FolderRepositoryInterface::class, FolderRepository::class);
         $this->app->bind(DocumentRepositoryInterface::class, DocumentRepository::class);
         $this->app->bind(DashboardRepositoryInterface::class, DashboardRepository::class);
+        $this->app->bind(ActivityLogRepositoryInterface::class, ActivityLogRepository::class);
     }
 }

@@ -3,6 +3,7 @@ import {
   Folder as FolderIcon, Search, FolderPlus, LayoutGrid, List, Pencil,
   Trash2, Lock, Globe, ArrowUpDown, ArrowUp, ArrowDown,
   ChevronRight, Inbox, MoreVertical,
+  Upload,
 } from 'lucide-react';
 import type { Role } from '@/types';
 import type { ApiFolder } from '@/api/folders';
@@ -22,6 +23,7 @@ type SortDir = 'asc' | 'desc';
 interface FolderListPageProps {
   role: Role;
   folders: ApiFolder[];
+  onUploadDocument: () => void;
   onNewFolder: () => void;
   onEditFolder: (folder: ApiFolder) => void;
   onDeleteFolder: (folder: ApiFolder) => void;
@@ -30,7 +32,7 @@ interface FolderListPageProps {
 }
 
 export default function FolderListPage({
-  role, folders, onNewFolder, onEditFolder, onDeleteFolder, onManageAccess, onOpenFolder,
+  role, folders, onUploadDocument, onNewFolder, onEditFolder, onDeleteFolder, onManageAccess, onOpenFolder,
 }: FolderListPageProps) {
   const canManage = role === 'admin';
   const [view, setView] = useState<'grid' | 'table'>('table');
@@ -80,6 +82,7 @@ export default function FolderListPage({
             {search && ` matching "${search}"`}
           </p>
         </div>
+        <div className="flex items-center gap-3">
         {canManage && (
           <button
             onClick={onNewFolder}
@@ -89,6 +92,19 @@ export default function FolderListPage({
             New Folder
           </button>
         )}
+        <div className="flex items-start justify-between gap-3">
+            <div className="flex-1" />
+              <button
+                onClick={onUploadDocument}
+                disabled={folders.length === 0}
+                className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold text-white bg-slate-800 hover:bg-slate-900 rounded-lg transition-all shadow-sm active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <Upload
+                className="w-4 h-4" />
+                Upload Document
+              </button>
+            </div>
+        </div>
       </div>
 
       {/* Toolbar */}
