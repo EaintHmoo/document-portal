@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\AccountDeactivatedException;
 use App\Exceptions\ConflictException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -24,4 +25,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(fn (ConflictException $e) => response()->json([
             'message' => $e->getMessage(),
         ], 409));
+
+        $exceptions->render(fn (AccountDeactivatedException $e) => response()->json([
+            'message' => $e->getMessage(),
+        ], 403));
     })->create();
