@@ -3,7 +3,6 @@ import {
   Folder, ArrowUpDown, ArrowUp, ArrowDown, ChevronRight, ChevronLeft, Inbox,
   Filter, X,
 } from 'lucide-react';
-import type { Role } from '@/types';
 import type { ApiDocument, DocumentListParams } from '@/api/documents';
 import type { ApiFolder } from '@/api/folders';
 import { fileTypeColors, defaultFileColor, SUPPORTED_EXTENSIONS } from '@/utils/fileTypes';
@@ -12,7 +11,6 @@ import { formatBytes, formatDate } from '@/utils/format';
 type SortValue = NonNullable<DocumentListParams['sort']>;
 
 interface DocumentListPageProps {
-  role: Role;
   documents: ApiDocument[];
   folders: ApiFolder[];
   loading: boolean;
@@ -29,18 +27,18 @@ interface DocumentListPageProps {
   sort: SortValue;
   onSortChange: (value: SortValue) => void;
   onUpload: () => void;
+  onOpenDetail: (doc: ApiDocument) => void;
   onEdit: (doc: ApiDocument) => void;
   onDelete: (doc: ApiDocument) => void;
   onDownload: (doc: ApiDocument) => void;
 }
 
 export default function DocumentListPage({
-  role, documents, folders, loading, total, page, lastPage, onPageChange,
+  documents, folders, loading, total, page, lastPage, onPageChange,
   search, onSearchChange, folderFilter, onFolderFilterChange,
   extensionFilter, onExtensionFilterChange, sort, onSortChange,
-  onUpload, onEdit, onDelete, onDownload,
+  onUpload, onOpenDetail, onEdit, onDelete, onDownload,
 }: DocumentListPageProps) {
-  const canManage = role === 'admin';
   const canUploadAnywhere = folders.some((f) => f.can_upload);
   const activeFilterCount = (folderFilter !== 'all' ? 1 : 0) + (extensionFilter !== 'all' ? 1 : 0);
 
@@ -202,7 +200,7 @@ export default function DocumentListPage({
                       <tr
                         key={doc.uuid}
                         className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors group cursor-pointer"
-                        onClick={() => onDownload(doc)}
+                        onClick={() => onOpenDetail(doc)}
                       >
                         <td className="px-5 py-3">
                           <div className="flex items-center gap-2.5">
@@ -242,7 +240,7 @@ export default function DocumentListPage({
                             >
                               <Download className="w-4 h-4" />
                             </button>
-                            {canManage && (
+                            {doc.can_edit && (
                               <button
                                 onClick={() => onEdit(doc)}
                                 title="Edit"
@@ -252,7 +250,7 @@ export default function DocumentListPage({
                                 <span className="hidden xl:inline">Edit</span>
                               </button>
                             )}
-                            {canManage && (
+                            {doc.can_delete && (
                               <button
                                 onClick={() => onDelete(doc)}
                                 title="Delete"

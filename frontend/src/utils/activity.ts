@@ -1,7 +1,7 @@
 import type { ComponentType } from 'react';
 import {
   Activity as ActivityIcon, LogIn, LogOut, UserPlus, Upload, Pencil,
-  Download, Trash2, FolderPlus, Lock, UserCheck, UserX, ShieldCheck,
+  Download, Trash2, FolderPlus, Lock, UserCheck, UserX, ShieldCheck, History,
 } from 'lucide-react';
 import type { ApiActivityLog } from '../api/dashboard';
 
@@ -13,6 +13,7 @@ export const actionMeta: Record<string, { icon: ComponentType<{ className?: stri
   'document.updated': { icon: Pencil, bg: 'bg-amber-50', text: 'text-amber-600', verb: 'updated', label: 'Document updated' },
   'document.downloaded': { icon: Download, bg: 'bg-cyan-50', text: 'text-cyan-600', verb: 'downloaded', label: 'Document downloaded' },
   'document.deleted': { icon: Trash2, bg: 'bg-rose-50', text: 'text-rose-600', verb: 'deleted', label: 'Document deleted' },
+  'document.version_deleted': { icon: History, bg: 'bg-rose-50', text: 'text-rose-600', verb: 'deleted a version of', label: 'Version deleted' },
   'folder.created': { icon: FolderPlus, bg: 'bg-violet-50', text: 'text-violet-600', verb: 'created folder', label: 'Folder created' },
   'folder.updated': { icon: Pencil, bg: 'bg-amber-50', text: 'text-amber-600', verb: 'updated folder', label: 'Folder updated' },
   'folder.deleted': { icon: Trash2, bg: 'bg-rose-50', text: 'text-rose-600', verb: 'deleted folder', label: 'Folder deleted' },

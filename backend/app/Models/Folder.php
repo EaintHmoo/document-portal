@@ -46,7 +46,7 @@ class Folder extends Model
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'folder_user')
-            ->withPivot(['permission', 'granted_by'])
+            ->withPivot(['can_view', 'can_create', 'can_edit', 'can_delete', 'granted_by'])
             ->withTimestamps();
     }
 
@@ -63,13 +63,39 @@ class Folder extends Model
             });
     }
 
-    /** The user's explicit grant on this folder, or null if they have none. */
-    public function permissionFor(User $user): ?string
+    /** The user's explicit grant on this folder — all false if they have no row at all. */
+    public function accessFor(User $user): array
     {
-        if ($this->relationLoaded('users')) {
-            return $this->users->firstWhere('id', $user->id)?->pivot->permission;
-        }
+        $pivot = $this->relationLoaded('users')
+            ? $this->users->firstWhere('id', $user->id)?->pivot
+            : $this->users()->where('user_id', $user->id)->first()?->pivot;
 
-        return $this->users()->where('user_id', $user->id)->first()?->pivot->permission;
+        return [
+            'can_view' => (bool) ($pivot->can_view ?? false),
+            'can_create' => (bool) ($pivot->can_create ?? false),
+            'can_edit' => (bool) ($pivot->can_edit ?? false),
+            'can_delete' => (bool) ($pivot->can_delete ?? false),
+        ];
+    }
+
+    public function hasViewAccess(User $user): bool
+    {
+        return $this->accessFor($user)['can_view'];
+    }
+
+    /** Can upload a brand-new document into this folder (distinct from editing an existing one). */
+    public function hasCreateAccess(User $user): bool
+    {
+        return $this->accessFor($user)['can_create'];
+    }
+
+    public function hasEditAccess(User $user): bool
+    {
+        return $this->accessFor($user)['can_edit'];
+    }
+
+    public function hasDeleteAccess(User $user): bool
+    {
+        return $this->accessFor($user)['can_delete'];
     }
 }

@@ -65,32 +65,46 @@ class FolderService
     }
 
     /**
-     * Every user in the system, each annotated with their current grant on
-     * this folder (or null) — the access modal needs the full roster so an
-     * admin can grant access to someone who doesn't have any yet.
+     * Every user in the system, each annotated with their current view/
+     * create/edit/delete grants on this folder — the access modal needs the
+     * full roster so an admin can grant access to someone who doesn't have
+     * any yet.
      */
     public function accessList(Folder $folder): array
     {
         $grants = $folder->users()->get()->keyBy('id');
 
-        return $this->users->all()->map(fn (User $user) => [
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'role' => $user->role->slug,
-            'permission' => $grants->get($user->id)?->pivot->permission,
-        ])->all();
+        return $this->users->all()->map(function (User $user) use ($grants) {
+            $pivot = $grants->get($user->id)?->pivot;
+
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role->slug,
+                'can_view' => (bool) ($pivot->can_view ?? false),
+                'can_create' => (bool) ($pivot->can_create ?? false),
+                'can_edit' => (bool) ($pivot->can_edit ?? false),
+                'can_delete' => (bool) ($pivot->can_delete ?? false),
+            ];
+        })->all();
     }
 
     /**
-     * @param array<int, array{user_id: int, permission: ?string}> $grants
+     * @param array<int, array{user_id: int, can_view: bool, can_create: bool, can_edit: bool, can_delete: bool}> $grants
      */
     public function syncAccess(Folder $folder, array $grants, User $editor): void
     {
         $pivotData = collect($grants)
-            ->filter(fn (array $grant) => in_array($grant['permission'], ['view', 'edit'], true))
+            ->filter(fn (array $grant) => $grant['can_view'] || $grant['can_create'] || $grant['can_edit'] || $grant['can_delete'])
             ->mapWithKeys(fn (array $grant) => [
-                $grant['user_id'] => ['permission' => $grant['permission'], 'granted_by' => $editor->id],
+                $grant['user_id'] => [
+                    'can_view' => $grant['can_view'],
+                    'can_create' => $grant['can_create'],
+                    'can_edit' => $grant['can_edit'],
+                    'can_delete' => $grant['can_delete'],
+                    'granted_by' => $editor->id,
+                ],
             ])
             ->all();
 

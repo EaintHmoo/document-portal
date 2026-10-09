@@ -7,6 +7,7 @@ use App\Http\Requests\Document\StoreDocumentVersionRequest;
 use App\Http\Requests\Document\UpdateDocumentRequest;
 use App\Http\Resources\DocumentResource;
 use App\Models\Document;
+use App\Models\DocumentVersion;
 use App\Services\Document\DocumentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -93,6 +94,44 @@ class DocumentController extends Controller
             'download_url' => $this->service->downloadUrl($document, $request->user()),
             'expires_in' => 300,
         ]);
+    }
+
+    public function downloadVersion(Request $request, string $uuid, int $versionId): JsonResponse
+    {
+        $document = $this->findOrFail($request, $uuid);
+
+        $this->authorize('download', $document);
+
+        $version = $this->findVersionOrFail($document, $versionId);
+
+        return response()->json([
+            'download_url' => $this->service->versionDownloadUrl($document, $version, $request->user()),
+            'expires_in' => 300,
+        ]);
+    }
+
+    public function destroyVersion(Request $request, string $uuid, int $versionId): JsonResponse
+    {
+        $document = $this->findOrFail($request, $uuid);
+
+        $this->authorize('deleteVersion', $document);
+
+        $version = $this->findVersionOrFail($document, $versionId);
+
+        $document = $this->service->deleteVersion($document, $version, $request->user());
+
+        return DocumentResource::make($document)->response();
+    }
+
+    private function findVersionOrFail(Document $document, int $versionId): DocumentVersion
+    {
+        $version = $document->versions()->find($versionId);
+
+        if (! $version) {
+            throw new NotFoundHttpException('Version not found.');
+        }
+
+        return $version;
     }
 
     /**

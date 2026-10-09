@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  ShieldCheck, Eye, EyeOff, Search, Check, Loader2,
-  Lock, UserCog, Users as UsersIcon, AlertCircle,
+  Eye, FilePlus, Pencil, Trash2, Search, Check, Loader2,
+  Lock, Users as UsersIcon, AlertCircle,
 } from 'lucide-react';
 import Modal from '@/components/Modal';
 import type { ApiFolder } from '@/api/folders';
-import { fetchFolderAccess, syncFolderAccess, type ApiFolderAccessEntry, type FolderPermission } from '@/api/folders';
+import { fetchFolderAccess, syncFolderAccess, type ApiFolderAccessEntry, type FolderAccessGrant } from '@/api/folders';
 
 interface FolderAccessModalProps {
   open: boolean;
@@ -13,41 +13,19 @@ interface FolderAccessModalProps {
   folder: ApiFolder | null;
 }
 
-/** The UI speaks in three tiers; the API only models view/edit/absent. */
-type PermissionLevel = 'full' | 'view' | 'none';
+type GrantFlags = { can_view: boolean; can_create: boolean; can_edit: boolean; can_delete: boolean };
+type AccessKey = keyof GrantFlags;
 
-function toLevel(permission: FolderPermission): PermissionLevel {
-  if (permission === 'edit') return 'full';
-  if (permission === 'view') return 'view';
-  return 'none';
-}
+const emptyFlags: GrantFlags = { can_view: false, can_create: false, can_edit: false, can_delete: false };
 
-function toPermission(level: PermissionLevel): FolderPermission {
-  if (level === 'full') return 'edit';
-  if (level === 'view') return 'view';
-  return null;
-}
-
-const permissionConfig: Record<PermissionLevel, { label: string; icon: typeof ShieldCheck; bg: string; activeBg: string }> = {
-  full: {
-    label: 'Full Access',
-    icon: ShieldCheck,
-    bg: 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100',
-    activeBg: 'bg-emerald-500 text-white',
-  },
-  view: {
-    label: 'View Only',
-    icon: Eye,
-    bg: 'bg-blue-50 text-blue-600 hover:bg-blue-100',
-    activeBg: 'bg-blue-500 text-white',
-  },
-  none: {
-    label: 'No Access',
-    icon: EyeOff,
-    bg: 'bg-slate-50 text-slate-400 hover:bg-slate-100',
-    activeBg: 'bg-slate-300 text-slate-600',
-  },
+const accessConfig: Record<AccessKey, { label: string; icon: typeof Eye; activeBg: string; description: string }> = {
+  can_view: { label: 'View', icon: Eye, activeBg: 'bg-blue-500 text-white', description: 'Can view and download' },
+  can_create: { label: 'Create', icon: FilePlus, activeBg: 'bg-amber-500 text-white', description: 'Can upload brand-new documents' },
+  can_edit: { label: 'Edit', icon: Pencil, activeBg: 'bg-emerald-500 text-white', description: 'Can re-upload new versions and edit details of existing documents' },
+  can_delete: { label: 'Delete', icon: Trash2, activeBg: 'bg-rose-500 text-white', description: 'Can delete documents and versions' },
 };
+
+const accessKeys: AccessKey[] = ['can_view', 'can_create', 'can_edit', 'can_delete'];
 
 function initials(name: string): string {
   return name.split(' ').map((p) => p[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'U';
@@ -55,7 +33,7 @@ function initials(name: string): string {
 
 export default function FolderAccessModal({ open, onClose, folder }: FolderAccessModalProps) {
   const [entries, setEntries] = useState<ApiFolderAccessEntry[]>([]);
-  const [levels, setLevels] = useState<Record<number, PermissionLevel>>({});
+  const [grants, setGrants] = useState<Record<number, GrantFlags>>({});
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -72,7 +50,14 @@ export default function FolderAccessModal({ open, onClose, folder }: FolderAcces
       .then((data) => {
         if (cancelled) return;
         setEntries(data);
-        setLevels(Object.fromEntries(data.map((u) => [u.id, toLevel(u.permission)])));
+        setGrants(
+          Object.fromEntries(
+            data.map((u) => [
+              u.id,
+              { can_view: u.can_view, can_create: u.can_create, can_edit: u.can_edit, can_delete: u.can_delete },
+            ]),
+          ),
+        );
       })
       .catch(() => {
         if (!cancelled) setError('Could not load access settings. Please try again.');
@@ -95,20 +80,20 @@ export default function FolderAccessModal({ open, onClose, folder }: FolderAcces
   );
 
   const stats = useMemo(() => {
-    const values = Object.values(levels);
+    const values = Object.values(grants);
     return {
-      full: values.filter((l) => l === 'full').length,
-      view: values.filter((l) => l === 'view').length,
-      none: values.filter((l) => l === 'none').length,
+      can_view: values.filter((g) => g.can_view).length,
+      can_create: values.filter((g) => g.can_create).length,
+      can_edit: values.filter((g) => g.can_edit).length,
+      can_delete: values.filter((g) => g.can_delete).length,
     };
-  }, [levels]);
+  }, [grants]);
 
-  const setPermission = (userId: number, level: PermissionLevel) => {
-    setLevels((prev) => ({ ...prev, [userId]: level }));
-  };
-
-  const setBulkPermission = (level: PermissionLevel) => {
-    setLevels((prev) => Object.fromEntries(Object.keys(prev).map((id) => [id, level])));
+  const toggle = (userId: number, key: AccessKey) => {
+    setGrants((prev) => ({
+      ...prev,
+      [userId]: { ...prev[userId], [key]: !prev[userId]?.[key] },
+    }));
   };
 
   const handleSave = async () => {
@@ -116,13 +101,11 @@ export default function FolderAccessModal({ open, onClose, folder }: FolderAcces
     setSaving(true);
     setError(null);
     try {
-      await syncFolderAccess(
-        folder.id,
-        Object.entries(levels).map(([userId, level]) => ({
-          user_id: Number(userId),
-          permission: toPermission(level),
-        })),
-      );
+      const payload: FolderAccessGrant[] = Object.entries(grants).map(([userId, flags]) => ({
+        user_id: Number(userId),
+        ...flags,
+      }));
+      await syncFolderAccess(folder.id, payload);
       onClose();
     } catch {
       setError('Could not save permissions. Please try again.');
@@ -183,69 +166,35 @@ export default function FolderAccessModal({ open, onClose, folder }: FolderAcces
           </div>
         ) : (
           <>
-            {/* Summary stats */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="flex items-center gap-2.5 p-3 bg-emerald-50 rounded-xl">
-                <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                </div>
-                <div>
-                  <p className="text-lg font-bold text-emerald-700 leading-none">{stats.full}</p>
-                  <p className="text-[10px] text-emerald-600 font-medium mt-0.5">Full Access</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2.5 p-3 bg-blue-50 rounded-xl">
-                <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
-                  <Eye className="w-4 h-4 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-lg font-bold text-blue-700 leading-none">{stats.view}</p>
-                  <p className="text-[10px] text-blue-600 font-medium mt-0.5">View Only</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2.5 p-3 bg-slate-50 rounded-xl border border-slate-100">
-                <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
-                  <EyeOff className="w-4 h-4 text-slate-400" />
-                </div>
-                <div>
-                  <p className="text-lg font-bold text-slate-500 leading-none">{stats.none}</p>
-                  <p className="text-[10px] text-slate-400 font-medium mt-0.5">No Access</p>
-                </div>
-              </div>
+            {/* Summary stats — independent, so these can overlap */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {accessKeys.map((key) => {
+                const cfg = accessConfig[key];
+                const Icon = cfg.icon;
+                return (
+                  <div key={key} className="flex items-center gap-2.5 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shrink-0 border border-slate-200">
+                      <Icon className="w-4 h-4 text-slate-500" />
+                    </div>
+                    <div>
+                      <p className="text-lg font-bold text-slate-700 leading-none">{stats[key]}</p>
+                      <p className="text-[10px] text-slate-400 font-medium mt-0.5">{cfg.label}</p>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
-            {/* Search + bulk actions */}
-            <div className="flex flex-col sm:flex-row gap-2.5">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search users..."
-                  className="w-full pl-9 pr-4 py-2.5 text-[13px] bg-slate-50 border border-slate-200 rounded-lg placeholder:text-slate-400 focus:bg-white focus:border-slate-300 focus:ring-2 focus:ring-slate-100 outline-none transition-all"
-                />
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-[11px] font-medium text-slate-400 hidden sm:flex items-center gap-1">
-                  <UserCog className="w-3.5 h-3.5" /> Set all:
-                </span>
-                {(Object.keys(permissionConfig) as PermissionLevel[]).map((level) => {
-                  const cfg = permissionConfig[level];
-                  const Icon = cfg.icon;
-                  return (
-                    <button
-                      key={level}
-                      onClick={() => setBulkPermission(level)}
-                      className={`flex items-center gap-1.5 px-2.5 py-2 text-[11px] font-semibold rounded-lg transition-colors ${cfg.bg}`}
-                      title={`Set all to ${cfg.label}`}
-                    >
-                      <Icon className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">{cfg.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search users..."
+                className="w-full pl-9 pr-4 py-2.5 text-[13px] bg-slate-50 border border-slate-200 rounded-lg placeholder:text-slate-400 focus:bg-white focus:border-slate-300 focus:ring-2 focus:ring-slate-100 outline-none transition-all"
+              />
             </div>
 
             {/* User list */}
@@ -257,7 +206,7 @@ export default function FolderAccessModal({ open, onClose, folder }: FolderAcces
                 </div>
               )}
               {filtered.map((user, index) => {
-                const level = levels[user.id] ?? 'none';
+                const flags = grants[user.id] ?? emptyFlags;
                 return (
                   <div
                     key={user.id}
@@ -284,22 +233,23 @@ export default function FolderAccessModal({ open, onClose, folder }: FolderAcces
                     </div>
 
                     <div className="flex items-center gap-1 shrink-0">
-                      {(Object.keys(permissionConfig) as PermissionLevel[]).map((lvl) => {
-                        const levelCfg = permissionConfig[lvl];
-                        const Icon = levelCfg.icon;
-                        const active = level === lvl;
+                      {accessKeys.map((key) => {
+                        const cfg = accessConfig[key];
+                        const Icon = cfg.icon;
+                        const active = flags[key];
                         return (
                           <button
-                            key={lvl}
-                            onClick={() => setPermission(user.id, lvl)}
+                            key={key}
+                            type="button"
+                            onClick={() => toggle(user.id, key)}
                             disabled={user.role === 'admin'}
                             className={`flex items-center gap-1 px-2 py-1.5 text-[10px] font-semibold rounded-md transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
-                              active ? levelCfg.activeBg : 'bg-slate-50 text-slate-400 hover:bg-slate-100'
+                              active ? cfg.activeBg : 'bg-slate-50 text-slate-400 hover:bg-slate-100'
                             }`}
-                            title={user.role === 'admin' ? 'Admins always have full access' : levelCfg.label}
+                            title={user.role === 'admin' ? 'Admins always have full access' : `${active ? 'Revoke' : 'Grant'} ${cfg.label.toLowerCase()} access`}
                           >
                             <Icon className="w-3 h-3" />
-                            <span className="hidden md:inline">{levelCfg.label}</span>
+                            <span className="hidden md:inline">{cfg.label}</span>
                           </button>
                         );
                       })}
@@ -311,15 +261,15 @@ export default function FolderAccessModal({ open, onClose, folder }: FolderAcces
 
             {/* Legend */}
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-400">
-              <span className="flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> Can view, upload, edit, delete
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Eye className="w-3.5 h-3.5 text-blue-500" /> Can view and download only
-              </span>
-              <span className="flex items-center gap-1.5">
-                <EyeOff className="w-3.5 h-3.5 text-slate-400" /> Cannot see this folder
-              </span>
+              {accessKeys.map((key) => {
+                const cfg = accessConfig[key];
+                const Icon = cfg.icon;
+                return (
+                  <span key={key} className="flex items-center gap-1.5">
+                    <Icon className="w-3.5 h-3.5" /> {cfg.description}
+                  </span>
+                );
+              })}
             </div>
           </>
         )}

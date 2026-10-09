@@ -14,14 +14,23 @@ export interface ApiFolder {
   updated_at: string;
 }
 
-export type FolderPermission = 'view' | 'edit' | null;
-
 export interface ApiFolderAccessEntry {
   id: number;
   name: string;
   email: string;
   role: ApiRole;
-  permission: FolderPermission;
+  can_view: boolean;
+  can_create: boolean;
+  can_edit: boolean;
+  can_delete: boolean;
+}
+
+export interface FolderAccessGrant {
+  user_id: number;
+  can_view: boolean;
+  can_create: boolean;
+  can_edit: boolean;
+  can_delete: boolean;
 }
 
 interface FolderCollectionEnvelope {
@@ -66,7 +75,7 @@ export function fetchFolderAccess(id: number): Promise<ApiFolderAccessEntry[]> {
 
 export function syncFolderAccess(
   id: number,
-  grants: { user_id: number; permission: FolderPermission }[],
+  grants: FolderAccessGrant[],
 ): Promise<ApiFolderAccessEntry[]> {
   return apiFetch<FolderAccessEnvelope>(`/api/folders/${id}/access`, { method: 'PUT', body: { grants } }).then(
     (res) => res.data,

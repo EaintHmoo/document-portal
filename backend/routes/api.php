@@ -32,5 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/documents/{uuid}', [DocumentController::class, 'update']);
     Route::delete('/documents/{uuid}', [DocumentController::class, 'destroy']);
     Route::post('/documents/{uuid}/versions', [DocumentController::class, 'storeVersion']);
+    Route::delete('/documents/{uuid}/versions/{versionId}', [DocumentController::class, 'destroyVersion']);
     Route::get('/documents/{uuid}/download', [DocumentController::class, 'download']);
+    Route::get('/documents/{uuid}/versions/{versionId}/download', [DocumentController::class, 'downloadVersion']);
 });

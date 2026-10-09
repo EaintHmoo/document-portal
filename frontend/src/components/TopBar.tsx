@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Bell, Menu, ChevronDown, Check, X, FileText, Download } from 'lucide-react';
+import { Bell, Menu, ChevronDown, Check, X, FileText, Download } from 'lucide-react';
 import type { DisplayUser } from '../types';
 
 interface TopbarProps {
@@ -30,15 +30,6 @@ export default function Topbar({ user, onMobileMenuClick, onSignOut }: TopbarPro
           >
             <Menu className="w-5 h-5" />
           </button>
-
-          <div className="relative flex-1 hidden sm:block">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search documents, folders..."
-              className="w-full pl-9 pr-4 py-2 text-sm bg-slate-100 border border-transparent rounded-lg placeholder:text-slate-400 focus:bg-white focus:border-slate-300 focus:ring-2 focus:ring-slate-200 outline-none transition-all"
-            />
-          </div>
         </div>
 
         {/* Right: Actions */}

@@ -4,18 +4,30 @@ namespace App\Services;
 
 use Aws\S3\S3Client;
 use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Throwable;
 
 class UploadService
 {
 
     /**
-     * Delete image
+     * Deletes an object from S3. Best-effort: a version row being removed
+     * from the database is the source of truth, so a transient S3 failure
+     * here shouldn't block that — it just leaves an orphaned object behind,
+     * logged for manual cleanup instead of surfacing as a 500.
      */
-    public function deleteFile($imagePath)
+    public function deleteFile($storageKey)
     {
-        if ($imagePath != null) {
-            \Storage::disk('s3')->delete($imagePath);
+        if (!$storageKey) {
+            return;
+        }
+
+        try {
+            Storage::disk('s3')->delete($storageKey);
+        } catch (Throwable $e) {
+            Log::warning('Failed to delete S3 object.', ['key' => $storageKey, 'error' => $e->getMessage()]);
         }
     }
 

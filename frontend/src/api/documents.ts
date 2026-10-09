@@ -21,10 +21,13 @@ export interface ApiDocument {
   mime_type: string;
   size_bytes: number;
   version_count: number;
+  can_edit: boolean;
+  can_delete: boolean;
   folder: ApiFolder | null;
   uploaded_by: ApiUser | null;
   updated_by: ApiUser | null;
   current_version: ApiDocumentVersion | null;
+  versions?: ApiDocumentVersion[];
   created_at: string;
   updated_at: string;
 }
@@ -99,4 +102,14 @@ export function deleteDocument(uuid: string): Promise<void> {
 
 export function getDownloadUrl(uuid: string): Promise<{ download_url: string; expires_in: number }> {
   return apiFetch(`/api/documents/${uuid}/download`);
+}
+
+export function getVersionDownloadUrl(uuid: string, versionId: number): Promise<{ download_url: string; expires_in: number }> {
+  return apiFetch(`/api/documents/${uuid}/versions/${versionId}/download`);
+}
+
+export function deleteDocumentVersion(uuid: string, versionId: number): Promise<ApiDocument> {
+  return apiFetch<DocumentEnvelope>(`/api/documents/${uuid}/versions/${versionId}`, { method: 'DELETE' }).then(
+    (res) => res.data,
+  );
 }

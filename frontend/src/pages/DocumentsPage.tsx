@@ -5,16 +5,19 @@ import DocumentListPage from '../components/DocumentListPage';
 import EditDocumentModal, { type EditDocumentData } from '../components/EditDocumentModal';
 import DeleteDocumentModal from '../components/DeleteDocumentModal';
 import UploadDocumentModal, { type UploadDocumentData } from '../components/UploadDocumentModal';
+import DocumentDetailModal from '../components/DocumentDetailModal';
 import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../api/client';
 import {
-  fetchDocuments, uploadDocument, updateDocument, deleteDocument, getDownloadUrl,
-  type ApiDocument, type DocumentListParams,
+  fetchDocuments, fetchDocument, uploadDocument, uploadDocumentVersion, updateDocument, deleteDocument,
+  deleteDocumentVersion, getDownloadUrl, getVersionDownloadUrl,
+  type ApiDocument, type ApiDocumentVersion, type DocumentListParams,
 } from '../api/documents';
 import { fetchFolders, type ApiFolder } from '../api/folders';
 
 type ModalState =
   | { type: 'none' }
+  | { type: 'detail'; uuid: string }
   | { type: 'edit'; doc: ApiDocument }
   | { type: 'delete'; doc: ApiDocument }
   | { type: 'upload' };
@@ -37,6 +40,8 @@ export default function DocumentsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [modal, setModal] = useState<ModalState>({ type: 'none' });
+  const [detailDoc, setDetailDoc] = useState<ApiDocument | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -92,6 +97,50 @@ export default function DocumentsPage() {
     }
   };
 
+  const handleOpenDetail = (doc: ApiDocument) => {
+    setModal({ type: 'detail', uuid: doc.uuid });
+    setDetailDoc(doc);
+    setDetailLoading(true);
+    fetchDocument(doc.uuid)
+      .then(setDetailDoc)
+      .catch(() => {
+        // Keep showing the list-row data the modal already opened with.
+      })
+      .finally(() => setDetailLoading(false));
+  };
+
+  const handleDownloadVersion = async (version: ApiDocumentVersion) => {
+    if (modal.type !== 'detail') return;
+    try {
+      const { download_url } = await getVersionDownloadUrl(modal.uuid, version.id);
+      window.open(download_url, '_blank', 'noopener,noreferrer');
+    } catch {
+      // Not worth a blocking error banner — the user can just try again.
+    }
+  };
+
+  const handleDeleteVersion = async (version: ApiDocumentVersion) => {
+    if (modal.type !== 'detail') return;
+    try {
+      const updated = await deleteDocumentVersion(modal.uuid, version.id);
+      setDetailDoc(updated);
+    } catch (err) {
+      throw new Error(err instanceof ApiError ? err.message : 'Could not delete this version. Please try again.');
+    }
+    await load();
+  };
+
+  const handleUploadVersion = async (file: File, changeNote: string) => {
+    if (modal.type !== 'detail') return;
+    try {
+      const updated = await uploadDocumentVersion(modal.uuid, file, changeNote || undefined);
+      setDetailDoc(updated);
+    } catch (err) {
+      throw new Error(err instanceof ApiError ? err.message : 'Could not upload a new version. Please try again.');
+    }
+    await load();
+  };
+
   const handleEdit = async (data: EditDocumentData) => {
     if (modal.type !== 'edit') return;
     await updateDocument(modal.doc.uuid, data);
@@ -135,7 +184,6 @@ export default function DocumentsPage() {
   return (
     <>
       <DocumentListPage
-        role={user.role}
         documents={documents}
         folders={folders}
         loading={loading}
@@ -152,9 +200,20 @@ export default function DocumentsPage() {
         sort={sort ?? 'newest'}
         onSortChange={(value) => updateParams({ sort: value }, false)}
         onUpload={() => setModal({ type: 'upload' })}
+        onOpenDetail={handleOpenDetail}
         onEdit={(doc) => setModal({ type: 'edit', doc })}
         onDelete={(doc) => setModal({ type: 'delete', doc })}
         onDownload={handleDownload}
+      />
+
+      <DocumentDetailModal
+        open={modal.type === 'detail'}
+        onClose={() => setModal({ type: 'none' })}
+        document={detailDoc}
+        loading={detailLoading}
+        onDownloadVersion={handleDownloadVersion}
+        onDeleteVersion={handleDeleteVersion}
+        onUploadVersion={handleUploadVersion}
       />
 
       <EditDocumentModal

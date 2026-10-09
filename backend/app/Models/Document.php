@@ -38,7 +38,7 @@ class Document extends Model
 
     public function versions(): HasMany
     {
-        return $this->hasMany(DocumentVersion::class);
+        return $this->hasMany(DocumentVersion::class)->orderByDesc('version_number');
     }
 
     public function currentVersion(): BelongsTo

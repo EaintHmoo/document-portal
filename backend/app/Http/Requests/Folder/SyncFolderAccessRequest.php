@@ -16,7 +16,10 @@ class SyncFolderAccessRequest extends FormRequest
         return [
             'grants' => ['required', 'array'],
             'grants.*.user_id' => ['required', 'integer', 'exists:users,id'],
-            'grants.*.permission' => ['nullable', 'in:view,edit'],
+            'grants.*.can_view' => ['required', 'boolean'],
+            'grants.*.can_create' => ['required', 'boolean'],
+            'grants.*.can_edit' => ['required', 'boolean'],
+            'grants.*.can_delete' => ['required', 'boolean'],
         ];
     }
 }

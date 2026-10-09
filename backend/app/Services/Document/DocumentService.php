@@ -2,6 +2,7 @@
 
 namespace App\Services\Document;
 
+use App\Exceptions\ConflictException;
 use App\Models\ActivityLog;
 use App\Models\Document;
 use App\Models\DocumentVersion;
@@ -76,7 +77,7 @@ class DocumentService
                 'version' => 1,
             ], $uploader);
 
-            return $document->fresh(['folder', 'uploader', 'currentVersion']);
+            return $document->fresh(['folder', 'uploader', 'currentVersion', 'versions.author']);
         });
     }
 
@@ -105,7 +106,7 @@ class DocumentService
                 'version' => $nextVersion,
             ], $uploader);
 
-            return $document->fresh(['folder', 'uploader', 'currentVersion']);
+            return $document->fresh(['folder', 'uploader', 'currentVersion', 'versions.author']);
         });
     }
 
@@ -132,14 +133,59 @@ class DocumentService
      */
     public function downloadUrl(Document $document, User $downloader): string
     {
-        $version = $document->currentVersion;
+        return $this->versionDownloadUrl($document, $document->currentVersion, $downloader);
+    }
 
+    /** Same as downloadUrl() but for any specific version, not just the current one. */
+    public function versionDownloadUrl(Document $document, DocumentVersion $version, User $downloader): string
+    {
         ActivityLog::record('document.downloaded', $document, [
             'title' => $document->title,
             'version' => $version->version_number,
         ], $downloader);
 
         return $this->uploadService->generateDownloadUrl($version->storage_key, $version->original_filename);
+    }
+
+    /**
+     * Removes one version while keeping the rest of the document intact.
+     * Deleting the current version promotes the next-most-recent remaining
+     * one; deleting the document's only version is rejected outright —
+     * use delete() on the whole document for that instead.
+     *
+     * @throws ConflictException
+     */
+    public function deleteVersion(Document $document, DocumentVersion $version, User $actor): Document
+    {
+        if ($document->versions()->count() <= 1) {
+            throw new ConflictException('A document must keep at least one version — delete the document instead.');
+        }
+
+        $wasCurrent = $document->current_version_id === $version->id;
+
+        $document = DB::transaction(function () use ($document, $version, $wasCurrent) {
+            if ($wasCurrent) {
+                $nextCurrent = $document->versions()
+                    ->where('id', '!=', $version->id)
+                    ->orderByDesc('version_number')
+                    ->firstOrFail();
+
+                $document->update(['current_version_id' => $nextCurrent->id]);
+            }
+
+            $version->delete();
+
+            return $document->fresh(['folder', 'uploader', 'currentVersion', 'versions.author']);
+        });
+
+        $this->uploadService->deleteFile($version->storage_key);
+
+        ActivityLog::record('document.version_deleted', $document, [
+            'title' => $document->title,
+            'version' => $version->version_number,
+        ], $actor);
+
+        return $document;
     }
 
     private function putFile(UploadedFile $file, string $documentUuid, int $versionNumber): string
