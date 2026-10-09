@@ -5,9 +5,15 @@ namespace App\Repositories\User;
 use App\Filters\UserFilter;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 
 class UserRepository implements UserRepositoryInterface
 {
+    public function all(): Collection
+    {
+        return User::query()->with('role')->orderBy('name')->get();
+    }
+
     public function findById(int $id): ?User
     {
         return User::query()->with('role')->find($id);

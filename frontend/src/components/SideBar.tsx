@@ -11,6 +11,7 @@ import {
   LogOut,
   Lock,
 } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 import type { Role, DisplayUser } from '../types';
 
 interface SidebarProps {
@@ -18,28 +19,25 @@ interface SidebarProps {
   user: DisplayUser;
   collapsed: boolean;
   onToggleCollapse: () => void;
-  activeItem: string;
-  onNavigate: (item: string) => void;
   mobileOpen: boolean;
   onMobileClose: () => void;
   onSignOut: () => void;
 }
 
 interface NavItem {
-  id: string;
+  path: string;
   label: string;
   icon: typeof LayoutDashboard;
   roles: Role[];
-  badge?: number;
 }
 
 const navItems: NavItem[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['admin', 'user'] },
-  { id: 'documents', label: 'Documents', icon: FileText, roles: ['admin', 'user'], badge: 1284 },
-  { id: 'folders', label: 'Folders', icon: FolderOpen, roles: ['admin', 'user'], badge: 6 },
-  { id: 'users', label: 'User Management', icon: Users, roles: ['admin'], badge: 247 },
-  { id: 'activity', label: 'Activity Log', icon: History, roles: ['admin'] },
-  { id: 'settings', label: 'Settings', icon: Settings, roles: ['admin', 'user'] },
+  { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['admin', 'user'] },
+  { path: '/documents', label: 'Documents', icon: FileText, roles: ['admin', 'user'] },
+  { path: '/folders', label: 'Folders', icon: FolderOpen, roles: ['admin', 'user'] },
+  { path: '/users', label: 'User Management', icon: Users, roles: ['admin'] },
+  { path: '/activity', label: 'Activity Log', icon: History, roles: ['admin'] },
+  { path: '/settings', label: 'Settings', icon: Settings, roles: ['admin', 'user'] },
 ];
 
 const colorMap: Record<string, string> = {
@@ -49,9 +47,10 @@ const colorMap: Record<string, string> = {
   violet: 'bg-violet-50 text-violet-600',
 };
 
-export default function Sidebar({ role, user, collapsed, onToggleCollapse, activeItem, onNavigate, mobileOpen, onMobileClose, onSignOut }: SidebarProps) {
+export default function Sidebar({ role, user, collapsed, onToggleCollapse, mobileOpen, onMobileClose, onSignOut }: SidebarProps) {
   const visibleItems = navItems.filter((item) => item.roles.includes(role));
   const roleColor = role === 'admin' ? 'violet' : 'blue';
+  const location = useLocation();
 
   return (
     <>
@@ -91,14 +90,12 @@ export default function Sidebar({ role, user, collapsed, onToggleCollapse, activ
           <ul className="space-y-1">
             {visibleItems.map((item) => {
               const Icon = item.icon;
-              const active = activeItem === item.id;
+              const active = location.pathname.startsWith(item.path);
               return (
-                <li key={item.id}>
-                  <button
-                    onClick={() => {
-                      onNavigate(item.id);
-                      onMobileClose();
-                    }}
+                <li key={item.path}>
+                  <Link
+                    to={item.path}
+                    onClick={onMobileClose}
                     className={`group w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 relative
                       ${active
                         ? 'bg-slate-800 text-white shadow-sm'
@@ -109,23 +106,8 @@ export default function Sidebar({ role, user, collapsed, onToggleCollapse, activ
                       className={`w-[18px] h-[18px] shrink-0 transition-transform duration-150 group-hover:scale-110 ${active ? '' : 'text-slate-400 group-hover:text-slate-600'}`}
                       strokeWidth={active ? 2.3 : 2}
                     />
-                    {!collapsed && (
-                      <>
-                        <span className="flex-1 text-left truncate">{item.label}</span>
-                        {item.badge !== undefined && (
-                          <span
-                            className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-md min-w-[20px] text-center
-                              ${active ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200'}`}
-                          >
-                            {item.badge > 999 ? `${(item.badge / 1000).toFixed(1)}k` : item.badge}
-                          </span>
-                        )}
-                      </>
-                    )}
-                    {collapsed && item.badge !== undefined && (
-                      <span className="absolute top-1 right-1.5 w-2 h-2 rounded-full bg-emerald-500" />
-                    )}
-                  </button>
+                    {!collapsed && <span className="flex-1 text-left truncate">{item.label}</span>}
+                  </Link>
                 </li>
               );
             })}

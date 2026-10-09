@@ -33,4 +33,10 @@ class FolderPolicy
     {
         return $folder->permissionFor($user) === 'edit';
     }
+
+    /** Only admins manage who can access a folder — Gate::before handles the true case. */
+    public function manageAccess(User $user, Folder $folder): bool
+    {
+        return false;
+    }
 }

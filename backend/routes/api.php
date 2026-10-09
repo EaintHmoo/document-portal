@@ -16,6 +16,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
 
     Route::apiResource('folders', FolderController::class)->parameters(['folders' => 'folder']);
+    Route::get('/folders/{folder}/access', [FolderController::class, 'access']);
+    Route::put('/folders/{folder}/access', [FolderController::class, 'syncAccess']);
 
     Route::get('/documents', [DocumentController::class, 'index']);
     Route::post('/documents', [DocumentController::class, 'store']);

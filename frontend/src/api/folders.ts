@@ -1,5 +1,5 @@
 import { apiFetch } from './client';
-import type { ApiUser } from './auth';
+import type { ApiUser, ApiRole } from './auth';
 
 export interface ApiFolder {
   id: number;
@@ -13,12 +13,26 @@ export interface ApiFolder {
   updated_at: string;
 }
 
+export type FolderPermission = 'view' | 'edit' | null;
+
+export interface ApiFolderAccessEntry {
+  id: number;
+  name: string;
+  email: string;
+  role: ApiRole;
+  permission: FolderPermission;
+}
+
 interface FolderCollectionEnvelope {
   data: ApiFolder[];
 }
 
 interface FolderEnvelope {
   data: ApiFolder;
+}
+
+interface FolderAccessEnvelope {
+  data: ApiFolderAccessEntry[];
 }
 
 export function fetchFolders(): Promise<ApiFolder[]> {
@@ -43,4 +57,17 @@ export function updateFolder(
 
 export function deleteFolder(id: number): Promise<void> {
   return apiFetch<void>(`/api/folders/${id}`, { method: 'DELETE' });
+}
+
+export function fetchFolderAccess(id: number): Promise<ApiFolderAccessEntry[]> {
+  return apiFetch<FolderAccessEnvelope>(`/api/folders/${id}/access`).then((res) => res.data);
+}
+
+export function syncFolderAccess(
+  id: number,
+  grants: { user_id: number; permission: FolderPermission }[],
+): Promise<ApiFolderAccessEntry[]> {
+  return apiFetch<FolderAccessEnvelope>(`/api/folders/${id}/access`, { method: 'PUT', body: { grants } }).then(
+    (res) => res.data,
+  );
 }

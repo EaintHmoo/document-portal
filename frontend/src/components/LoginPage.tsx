@@ -1,12 +1,9 @@
 import { useState, type FormEvent } from 'react';
 import { Shield, Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-interface LoginPageProps {
-  onSwitchToRegister: () => void;
-}
-
-export default function LoginPage({ onSwitchToRegister }: LoginPageProps) {
+export default function LoginPage() {
   const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -192,12 +189,12 @@ export default function LoginPage({ onSwitchToRegister }: LoginPageProps) {
           {/* Switch to register */}
           <p className="mt-8 text-center text-[13px] text-slate-500">
             Don't have an account?{' '}
-            <button
-              onClick={onSwitchToRegister}
+            <Link
+              to="/register"
               className="font-semibold text-slate-800 hover:text-slate-900 underline underline-offset-2 transition-colors"
             >
               Create one
-            </button>
+            </Link>
           </p>
         </div>
       </div>

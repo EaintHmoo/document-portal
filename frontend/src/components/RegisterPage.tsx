@@ -1,12 +1,9 @@
 import { useState, type FormEvent } from 'react';
 import { Shield, Mail, Lock, User, Eye, EyeOff, ArrowRight, AlertCircle, Loader2, Check } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-interface RegisterPageProps {
-  onSwitchToLogin: () => void;
-}
-
-export default function RegisterPage({ onSwitchToLogin }: RegisterPageProps) {
+export default function RegisterPage() {
   const { signUp } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -60,13 +57,13 @@ export default function RegisterPage({ onSwitchToLogin }: RegisterPageProps) {
           <p className="text-[14px] text-slate-500 mt-2 leading-relaxed">
             Your account has been set up successfully. You can now sign in with your email and password.
           </p>
-          <button
-            onClick={onSwitchToLogin}
+          <Link
+            to="/login"
             className="mt-6 w-full flex items-center justify-center gap-2 px-4 py-3 text-[14px] font-semibold text-white bg-slate-800 hover:bg-slate-900 rounded-xl transition-all shadow-sm active:scale-[0.99]"
           >
             Continue to Sign In
             <ArrowRight className="w-4 h-4" />
-          </button>
+          </Link>
         </div>
       </div>
     );
@@ -125,9 +122,9 @@ export default function RegisterPage({ onSwitchToLogin }: RegisterPageProps) {
           {/* Bottom */}
           <div className="text-[13px] text-slate-500">
             Already have an account?{' '}
-            <button onClick={onSwitchToLogin} className="font-semibold text-slate-300 hover:text-white transition-colors">
+            <Link to="/login" className="font-semibold text-slate-300 hover:text-white transition-colors">
               Sign in here
-            </button>
+            </Link>
           </div>
         </div>
       </div>
@@ -290,12 +287,12 @@ export default function RegisterPage({ onSwitchToLogin }: RegisterPageProps) {
           {/* Switch to login */}
           <p className="mt-6 text-center text-[13px] text-slate-500">
             Already have an account?{' '}
-            <button
-              onClick={onSwitchToLogin}
+            <Link
+              to="/login"
               className="font-semibold text-slate-800 hover:text-slate-900 underline underline-offset-2 transition-colors"
             >
               Sign in
-            </button>
+            </Link>
           </p>
         </div>
       </div>

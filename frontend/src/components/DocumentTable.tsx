@@ -3,17 +3,7 @@ import { FileText, Download, Folder, Loader2 } from 'lucide-react';
 import type { ApiDocument } from '../api/documents';
 import { getDownloadUrl } from '../api/documents';
 import { formatBytes, formatDate } from '../utils/format';
-
-const fileTypeColors: Record<string, { bg: string; text: string; border: string }> = {
-  pdf: { bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200' },
-  doc: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
-  docx: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
-  xls: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
-  xlsx: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
-  ppt: { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' },
-  pptx: { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' },
-};
-const defaultFileColor = { bg: 'bg-slate-100', text: 'text-slate-600', border: 'border-slate-200' };
+import { fileTypeColors, defaultFileColor } from '../utils/fileTypes';
 
 interface DocumentTableProps {
   documents: ApiDocument[];

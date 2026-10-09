@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Folder\StoreFolderRequest;
+use App\Http\Requests\Folder\SyncFolderAccessRequest;
 use App\Http\Requests\Folder\UpdateFolderRequest;
 use App\Http\Resources\FolderResource;
 use App\Models\Folder;
@@ -51,5 +52,19 @@ class FolderController extends Controller
         $this->service->delete($folder, $request->user());
 
         return response()->json(['message' => 'Folder deleted.']);
+    }
+
+    public function access(Request $request, Folder $folder): JsonResponse
+    {
+        $this->authorize('manageAccess', $folder);
+
+        return response()->json(['data' => $this->service->accessList($folder)]);
+    }
+
+    public function syncAccess(SyncFolderAccessRequest $request, Folder $folder): JsonResponse
+    {
+        $this->service->syncAccess($folder, $request->validated('grants'), $request->user());
+
+        return response()->json(['data' => $this->service->accessList($folder)]);
     }
 }

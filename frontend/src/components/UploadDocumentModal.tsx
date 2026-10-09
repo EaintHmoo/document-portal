@@ -1,0 +1,246 @@
+import { useState, useRef, type FormEvent } from 'react';
+import { UploadCloud, X, Loader2, Check, AlertCircle } from 'lucide-react';
+import Modal from '@/components/Modal';
+import { fileTypeColors } from '@/utils/fileTypes';
+
+export interface UploadDocumentData {
+  file: File;
+  title: string;
+  description: string;
+  folderId: number;
+}
+
+interface UploadDocumentModalProps {
+  open: boolean;
+  onClose: () => void;
+  folders: { id: number; name: string }[];
+  onUpload: (data: UploadDocumentData) => Promise<void>;
+}
+
+const acceptedTypes = [
+  { ext: 'pdf', label: '.pdf' },
+  { ext: 'doc', label: '.doc' },
+  { ext: 'docx', label: '.docx' },
+  { ext: 'xls', label: '.xls' },
+  { ext: 'xlsx', label: '.xlsx' },
+  { ext: 'ppt', label: '.ppt' },
+  { ext: 'pptx', label: '.pptx' },
+];
+
+function formatSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function titleFromFilename(filename: string): string {
+  return filename.replace(/\.[^.]+$/, '');
+}
+
+export default function UploadDocumentModal({ open, onClose, folders, onUpload }: UploadDocumentModalProps) {
+  const [file, setFile] = useState<File | null>(null);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [folderId, setFolderId] = useState(folders[0]?.id ?? 0);
+  const [loading, setLoading] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const reset = () => {
+    setFile(null);
+    setTitle('');
+    setDescription('');
+    setFolderId(folders[0]?.id ?? 0);
+    setLoading(false);
+    setDragging(false);
+    setError(null);
+  };
+
+  const handleClose = () => {
+    reset();
+    onClose();
+  };
+
+  const handleFileSelect = (selected: File | null) => {
+    if (!selected) return;
+    setFile(selected);
+    if (!title) setTitle(titleFromFilename(selected.name));
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!file || !title.trim() || !folderId) return;
+
+    setLoading(true);
+    setError(null);
+    try {
+      await onUpload({ file, title: title.trim(), description: description.trim(), folderId });
+      reset();
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not upload this document. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Modal
+      open={open}
+      onClose={handleClose}
+      title="Upload Document"
+      subtitle="Add a new file to a folder"
+      icon={<UploadCloud className="w-5 h-5" />}
+      footer={
+        <>
+          <button
+            onClick={handleClose}
+            className="px-4 py-2.5 text-[14px] font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={!file || !title.trim() || !folderId || loading}
+            className="flex items-center gap-2 px-4 py-2.5 text-[14px] font-semibold text-white bg-slate-800 hover:bg-slate-900 rounded-lg transition-all shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Uploading...
+              </>
+            ) : (
+              <>
+                <UploadCloud className="w-4 h-4" />
+                Upload
+              </>
+            )}
+          </button>
+        </>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {error && (
+          <div className="flex items-start gap-2.5 px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl">
+            <AlertCircle className="w-4 h-4 text-rose-500 mt-0.5 shrink-0" />
+            <p className="text-[13px] text-rose-700 font-medium">{error}</p>
+          </div>
+        )}
+
+        {/* Dropzone */}
+        <div
+          onClick={() => inputRef.current?.click()}
+          onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragging(false);
+            handleFileSelect(e.dataTransfer.files[0] ?? null);
+          }}
+          className={`flex flex-col items-center justify-center gap-3 px-6 py-10 rounded-xl border-2 border-dashed cursor-pointer transition-all ${
+            dragging
+              ? 'border-slate-400 bg-slate-50'
+              : file
+                ? 'border-emerald-300 bg-emerald-50/50'
+                : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+          }`}
+        >
+          <input
+            ref={inputRef}
+            type="file"
+            className="hidden"
+            accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+            onChange={(e) => handleFileSelect(e.target.files?.[0] ?? null)}
+          />
+          {file ? (
+            <>
+              <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
+                <Check className="w-6 h-6 text-emerald-600" />
+              </div>
+              <div className="text-center">
+                <p className="text-[14px] font-semibold text-slate-700">{file.name}</p>
+                <p className="text-[12px] text-slate-400 mt-0.5">{formatSize(file.size)}</p>
+              </div>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setFile(null); }}
+                className="flex items-center gap-1 text-[12px] font-medium text-slate-400 hover:text-rose-500 transition-colors"
+              >
+                <X className="w-3.5 h-3.5" />
+                Remove file
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center">
+                <UploadCloud className="w-6 h-6 text-slate-400" />
+              </div>
+              <div className="text-center">
+                <p className="text-[14px] font-semibold text-slate-600">
+                  Drag and drop or <span className="text-slate-800 underline">browse</span>
+                </p>
+                <p className="text-[12px] text-slate-400 mt-1">PDF, DOC, XLS, PPT up to 20 MB</p>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Title */}
+        <div>
+          <label className="block text-[13px] font-semibold text-slate-700 mb-1.5">Title</label>
+          <input
+            type="text"
+            required
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Document title"
+            className="w-full px-4 py-2.5 text-[14px] bg-white border border-slate-200 rounded-xl placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 outline-none transition-all"
+          />
+        </div>
+
+        {/* Description */}
+        <div>
+          <label className="block text-[13px] font-semibold text-slate-700 mb-1.5">Description</label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Optional notes about this document"
+            rows={2}
+            className="w-full px-4 py-2.5 text-[14px] bg-white border border-slate-200 rounded-xl placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 outline-none transition-all resize-none"
+          />
+        </div>
+
+        {/* Folder selection */}
+        <div>
+          <label className="block text-[13px] font-semibold text-slate-700 mb-1.5">Destination Folder</label>
+          <select
+            value={folderId}
+            onChange={(e) => setFolderId(Number(e.target.value))}
+            className="w-full px-4 py-2.5 text-[14px] bg-white border border-slate-200 rounded-xl focus:border-slate-400 focus:ring-4 focus:ring-slate-100 outline-none transition-all cursor-pointer"
+          >
+            {folders.length === 0 && <option value={0}>No folders available</option>}
+            {folders.map((f) => (
+              <option key={f.id} value={f.id}>{f.name}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Accepted types preview */}
+        <div className="flex flex-wrap gap-1.5">
+          {acceptedTypes.map((t) => {
+            const fc = fileTypeColors[t.ext];
+            return (
+              <span
+                key={t.ext}
+                className={`text-[10px] font-bold px-2 py-1 rounded-md border ${fc.bg} ${fc.text} ${fc.border}`}
+              >
+                {t.label}
+              </span>
+            );
+          })}
+        </div>
+      </form>
+    </Modal>
+  );
+}
