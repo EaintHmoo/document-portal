@@ -1,11 +1,13 @@
 import { useState, type FormEvent } from 'react';
 import { Shield, Mail, Lock, User, Eye, EyeOff, ArrowRight, AlertCircle, Loader2, Check } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 interface RegisterPageProps {
   onSwitchToLogin: () => void;
 }
 
 export default function RegisterPage({ onSwitchToLogin }: RegisterPageProps) {
+  const { signUp } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,6 +22,32 @@ export default function RegisterPage({ onSwitchToLogin }: RegisterPageProps) {
     { label: 'Contains uppercase letter', valid: /[A-Z]/.test(password) },
     { label: 'Contains a number', valid: /\d/.test(password) },
   ];
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError(null);
+
+    if (!passwordChecks.every((check) => check.valid)) {
+      setError('Please meet all password requirements.');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+
+    setLoading(true);
+    const { error: signUpError } = await signUp(name, email, password, confirmPassword);
+    setLoading(false);
+
+    if (signUpError) {
+      setError(signUpError);
+      return;
+    }
+
+    setSuccess(true);
+  };
 
   if (success) {
     return (
@@ -133,7 +161,7 @@ export default function RegisterPage({ onSwitchToLogin }: RegisterPageProps) {
           )}
 
           {/* Form */}
-          <form className="space-y-4">
+          <form className="space-y-4" onSubmit={handleSubmit}>
             {/* Name */}
             <div>
               <label className="block text-[13px] font-semibold text-slate-700 mb-1.5">Full Name</label>
@@ -142,6 +170,7 @@ export default function RegisterPage({ onSwitchToLogin }: RegisterPageProps) {
                 <input
                   type="text"
                   required
+                  autoComplete="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="John Smith"
@@ -158,6 +187,7 @@ export default function RegisterPage({ onSwitchToLogin }: RegisterPageProps) {
                 <input
                   type="email"
                   required
+                  autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@company.com"
@@ -174,6 +204,7 @@ export default function RegisterPage({ onSwitchToLogin }: RegisterPageProps) {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
+                  autoComplete="new-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Create a strong password"
@@ -217,6 +248,7 @@ export default function RegisterPage({ onSwitchToLogin }: RegisterPageProps) {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
+                  autoComplete="new-password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Re-enter your password"

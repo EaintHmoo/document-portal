@@ -1,0 +1,497 @@
+# Internal Document Portal — Technical Assessment
+
+## 1. Objective
+
+Build a **secure Internal Document Portal** for a company that allows employees to manage, organize, search, and access company documents based on their assigned permissions.
+
+The application should demonstrate your ability to design and develop a production-ready web application with a clear architecture, secure access control, maintainable code, and a clean user experience.
+
+---
+
+## 2. Required Technology Stack
+
+The application must use the following technologies:
+
+* **Frontend:** React.js
+* **Backend:** Laravel
+* **Database:** MySQL or PostgreSQL
+
+You are free to choose supporting libraries or packages where appropriate. Please document any important technical decisions in the README.
+
+---
+
+# 3. Authentication & User Management
+
+The system must include authentication and role-based access control.
+
+### Required Features
+
+* User login
+* User logout
+* At least two user roles:
+
+  * **Admin**
+  * **User**
+* Role-based authorization
+* Users must only be able to access features and documents they are authorized to access.
+* Unauthorized users must not be able to access restricted pages or API endpoints.
+
+### Admin
+
+Admins should have appropriate permissions to manage the system, including:
+
+* Manage users where applicable
+* Manage folders
+* Manage documents
+* View system activity
+
+### User
+
+Regular users should only have access to the documents and features permitted for their role.
+
+> **Note:** You may define the exact permission rules, but your assumptions should be clearly documented in the README.
+
+---
+
+# 4. Document Management
+
+The main purpose of the application is to allow authorized users to manage company documents.
+
+Users should be able to:
+
+* Upload documents
+* View document details
+* Search documents
+* Filter documents
+* Download documents
+* Update document information
+* Delete documents when they have permission to do so
+
+### Supported File Types
+
+The system should support common office document formats, including:
+
+* PDF
+* DOC
+* DOCX
+* XLS
+* XLSX
+* PPT
+* PPTX
+
+The application should validate uploaded files appropriately, including file type and other relevant restrictions.
+
+---
+
+# 5. Document Organization
+
+Documents should be organized into **folders or categories**.
+
+### Folder Management
+
+Admins should be able to:
+
+* Create folders
+* Edit folders
+* Delete folders
+* View documents within a folder
+
+Users should be able to browse and access folders and documents according to their permissions.
+
+You may define the folder structure and permission model based on your design decisions.
+
+---
+
+# 6. Document Version History
+
+The system should maintain a history of document changes.
+
+When a document is updated, the application should preserve previous versions where applicable.
+
+The document history should provide enough information to understand:
+
+* Which document was changed
+* Who made the change
+* When the change was made
+* Previous version(s) of the document
+
+Where practical, users with the appropriate permissions should be able to view or download previous versions.
+
+> The implementation does not need to be overly complex. A simple and reliable versioning approach is preferred over an unnecessarily complicated solution.
+
+---
+
+# 7. Activity Log
+
+The system should maintain an activity log for important user actions.
+
+Examples of activities that should be recorded include:
+
+* User login/logout
+* Document upload
+* Document update
+* Document download
+* Document deletion
+* Folder creation, update, or deletion
+* Other important administrative actions
+
+Each activity should record relevant information such as:
+
+* User
+* Action
+* Related document or folder, where applicable
+* Date and time
+
+Admins should be able to view the activity history.
+
+---
+
+# 8. Dashboard
+
+Provide a simple dashboard that gives users useful information about the document portal.
+
+For example:
+
+### Admin Dashboard
+
+* Total users
+* Total documents
+* Total folders
+* Recent activities
+* Recently uploaded documents
+
+### User Dashboard
+
+* Accessible document count
+* Accessible folders
+* Recently uploaded or updated documents
+* Recent activity
+
+You do not need to implement every possible statistic. Focus on information that is useful and relevant to the system.
+
+---
+
+# 9. Search & Filtering
+
+The document listing should provide a practical way to find documents quickly.
+
+At minimum, consider supporting:
+
+* Search by document name
+* Filter by folder/category
+* Filter by document type
+* Sorting by relevant fields such as name or date
+
+Search and filtering should respect the user's permissions.
+
+A user must not be able to discover or retrieve documents they are not authorized to access through search, filters, direct URLs, or API requests.
+
+---
+
+# 10. UI/UX Requirements
+
+The application should have a:
+
+* Clean interface
+* Responsive layout
+* Consistent design
+* Clear navigation
+* Easy-to-understand document management workflow
+* Appropriate loading, success, and error states
+
+The application should work reasonably well on both desktop and mobile screen sizes.
+
+The UI does not need to be highly elaborate. **Usability and clarity are more important than visual complexity.**
+
+---
+
+# 11. Security Requirements
+
+Security is an important part of this assessment.
+
+The application should appropriately handle:
+
+* Authentication
+* Authorization
+* Role-based access control
+* File upload validation
+* Unauthorized API requests
+* Unauthorized document access
+* Input validation
+* Secure file downloads
+* Protection against common web security issues
+* Secure handling of passwords and authentication data
+
+Documents should not be exposed simply by knowing or guessing a file URL.
+
+Do not include real credentials, API keys, tokens, or other sensitive information in the submitted source code.
+
+---
+
+# 12. Error Handling
+
+The application should handle common errors gracefully.
+
+Examples include:
+
+* Invalid login credentials
+* Invalid form input
+* Unsupported file type
+* File upload failure
+* Missing document
+* Missing folder
+* Unauthorized access
+* Failed database operations
+* Failed document download
+* Invalid API requests
+
+Errors should provide useful feedback to the user without exposing sensitive technical information.
+
+---
+
+# 13. Performance & Scalability
+
+The system should be designed with the assumption that the number of users and documents may grow significantly over time.
+
+Please consider appropriate:
+
+* Database indexes
+* Pagination
+* Efficient database queries
+* API response handling
+* File storage strategy
+* Search and filtering performance
+* Avoidance of unnecessary database queries
+
+You do not need to implement enterprise-level infrastructure, but your architecture should demonstrate awareness of scalability.
+
+---
+
+# 14. API Design
+
+The Laravel backend should expose a clear API for the React frontend.
+
+The API should:
+
+* Follow a consistent structure
+* Use appropriate HTTP methods and status codes
+* Validate incoming requests
+* Return consistent responses
+* Enforce authentication and authorization
+* Handle errors appropriately
+
+You are free to choose the API authentication approach, provided it is secure and documented.
+
+---
+
+# 15. Database Design
+
+Design the database to properly support the application's requirements.
+
+Your database should account for relevant entities such as:
+
+* Users
+* Roles
+* Documents
+* Folders
+* Document versions
+* Activity logs
+* Any additional entities required by your design
+
+Use proper:
+
+* Relationships
+* Foreign keys where appropriate
+* Indexes
+* Constraints
+* Timestamps
+
+Database migrations must be included in the submission.
+
+---
+
+# 16. Time Limit
+
+**24 hours**
+
+You are **not expected to implement every possible feature** within the time limit.
+
+Please prioritize:
+
+1. Core functionality
+2. Security and authorization
+3. Clean architecture
+4. Database design
+5. Usability
+6. Error handling
+7. Performance considerations
+
+A smaller, well-engineered application is preferred over a large application with incomplete or unreliable features.
+
+---
+
+# 17. Submission Requirements
+
+Please provide the following:
+
+### Source Code
+
+* React frontend
+* Laravel backend
+* Required configuration files
+
+### Database
+
+* Database migrations
+* Seeders
+* Sample/demo data where appropriate
+
+### Documentation
+
+A `README.md` containing:
+
+* Project overview
+* Technology stack
+* Setup instructions
+* Environment configuration
+* Database setup
+* Migration and seeding instructions
+* How to run the frontend
+* How to run the backend
+* API information, where appropriate
+* Test credentials
+* Important technical decisions
+* Assumptions and limitations
+* Any features that were intentionally not implemented
+
+### Environment
+
+Provide:
+
+* `.env.example`
+
+Do **not** include:
+
+* Real passwords
+* API keys
+* Access tokens
+* Production credentials
+* Other sensitive information
+
+---
+
+# 18. Test Credentials
+
+Please provide test credentials in the README so that the application can be evaluated easily.
+
+For example:
+
+**Admin**
+
+* Email: `admin@example.com`
+* Password: `password`
+
+**User**
+
+* Email: `user@example.com`
+* Password: `password`
+
+These must be dummy/test credentials only.
+
+---
+
+# 19. Evaluation Criteria
+
+The solution will be evaluated based on the following areas:
+
+### Functionality
+
+* Core features work correctly
+* Documents can be managed successfully
+* Authentication and authorization work correctly
+
+### Code Quality
+
+* Clean and readable code
+* Maintainable structure
+* Appropriate separation of concerns
+* Good development practices
+
+### Architecture
+
+* Clear frontend/backend architecture
+* Appropriate Laravel and React structure
+* Sensible approach to application design
+
+### UI/UX
+
+* Clean and responsive interface
+* Easy navigation
+* Clear user feedback
+* Practical document management experience
+
+### Security
+
+* Proper authentication
+* Correct authorization
+* Secure document access
+* Input and file validation
+* No obvious security vulnerabilities
+
+### Database Design
+
+* Appropriate relationships
+* Proper migrations
+* Good indexing and constraints
+* Suitable structure for future growth
+
+### API Design
+
+* Consistent endpoints
+* Appropriate HTTP methods and status codes
+* Proper validation and error responses
+* Authorization enforced at the API level
+
+### Performance
+
+* Pagination
+* Efficient queries
+* Appropriate indexing
+* Consideration for increasing document and user volume
+
+### Error Handling
+
+* Graceful handling of invalid input
+* Appropriate handling of failed operations
+* Useful user-facing error messages
+* No unnecessary exposure of sensitive system information
+
+### Overall Engineering Approach
+
+We will also consider the overall quality of the solution, including:
+
+* Technical decision-making
+* Simplicity and maintainability
+* Attention to security
+* Documentation
+* Handling of edge cases
+* Appropriate prioritization within the 24-hour time limit
+
+---
+
+# 20. Technical Decisions & Assumptions
+
+You are free to make reasonable technical decisions where the requirements do not specify an exact implementation.
+
+For example, you may choose:
+
+* MySQL or PostgreSQL
+* Your preferred Laravel authentication approach
+* Your preferred file storage approach
+* The exact permission model
+* The UI component library
+* Supporting libraries and packages
+
+Please document important decisions, assumptions, and limitations in the `README.md`.
+
+**The goal of this assessment is not to implement every possible feature, but to demonstrate how you approach building a secure, maintainable, and scalable document management application within a limited timeframe.**

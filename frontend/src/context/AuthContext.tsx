@@ -1,34 +1,24 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import type { Role } from '../data/mockData';
+import { ApiError } from '../api/client';
+import { fetchCurrentUser, login, logout, register, type ApiRole, type ApiUser } from '../api/auth';
 
 export interface AuthUser {
-  id: string;
+  id: number;
   email: string;
   name: string;
   initials: string;
-  role: Role;
+  role: ApiRole;
 }
 
 interface AuthContextValue {
   user: AuthUser | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
-  signUp: (name: string, email: string, password: string) => Promise<{ error: string | null }>;
+  signUp: (name: string, email: string, password: string, passwordConfirmation: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
-
-const STORAGE_KEY = 'docportal_auth_user';
-const ACCOUNTS_KEY = 'docportal_accounts';
-
-interface StoredAccount {
-  id: string;
-  name: string;
-  email: string;
-  password: string;
-  role: Role;
-}
 
 function getInitials(name: string): string {
   return (
@@ -42,27 +32,22 @@ function getInitials(name: string): string {
   );
 }
 
-function loadAccounts(): StoredAccount[] {
-  try {
-    const raw = localStorage.getItem(ACCOUNTS_KEY);
-    return raw ? JSON.parse(raw) as StoredAccount[] : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveAccounts(accounts: StoredAccount[]): void {
-  localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
-}
-
-function toAuthUser(account: StoredAccount): AuthUser {
+function toAuthUser(apiUser: ApiUser): AuthUser {
   return {
-    id: account.id,
-    email: account.email,
-    name: account.name,
-    initials: getInitials(account.name),
-    role: account.role,
+    id: apiUser.id,
+    email: apiUser.email,
+    name: apiUser.name,
+    initials: getInitials(apiUser.name),
+    role: apiUser.role,
   };
+}
+
+/** Everything that isn't a known validation error collapses to one safe, generic message. */
+function toErrorMessage(err: unknown, fallback: string): string {
+  if (err instanceof ApiError) {
+    return err.message || fallback;
+  }
+  return fallback;
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -70,57 +55,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setUser(JSON.parse(raw) as AuthUser);
-    } catch {
-      // ignore parse errors
-    }
-    setLoading(false);
+    fetchCurrentUser()
+      .then((apiUser) => setUser(toAuthUser(apiUser)))
+      .catch(() => setUser(null))
+      .finally(() => setLoading(false));
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const accounts = loadAccounts();
-    const account = accounts.find(
-      (a) => a.email.toLowerCase() === email.toLowerCase() && a.password === password
-    );
-
-    if (!account) {
-      return { error: 'Invalid email or password. Please try again.' };
+    try {
+      const apiUser = await login(email, password);
+      setUser(toAuthUser(apiUser));
+      return { error: null };
+    } catch (err) {
+      return { error: toErrorMessage(err, 'Invalid email or password. Please try again.') };
     }
-
-    const authUser = toAuthUser(account);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(authUser));
-    setUser(authUser);
-    return { error: null };
   };
 
-  const signUp = async (name: string, email: string, password: string) => {
-    const accounts = loadAccounts();
-    const exists = accounts.some((a) => a.email.toLowerCase() === email.toLowerCase());
-
-    if (exists) {
-      return { error: 'An account with this email already exists.' };
+  const signUp = async (name: string, email: string, password: string, passwordConfirmation: string) => {
+    try {
+      await register(name, email, password, passwordConfirmation);
+      return { error: null };
+    } catch (err) {
+      return { error: toErrorMessage(err, 'Could not create your account. Please try again.') };
     }
-
-    const account: StoredAccount = {
-      id: crypto.randomUUID(),
-      name,
-      email,
-      password,
-      role: 'user',
-    };
-
-    saveAccounts([...accounts, account]);
-    const authUser = toAuthUser(account);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(authUser));
-    setUser(authUser);
-    return { error: null };
   };
 
   const signOut = async () => {
-    localStorage.removeItem(STORAGE_KEY);
-    setUser(null);
+    try {
+      await logout();
+    } finally {
+      setUser(null);
+    }
   };
 
   return (

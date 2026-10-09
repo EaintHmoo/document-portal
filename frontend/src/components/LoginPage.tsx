@@ -1,16 +1,29 @@
 import { useState, type FormEvent } from 'react';
 import { Shield, Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 interface LoginPageProps {
   onSwitchToRegister: () => void;
 }
 
 export default function LoginPage({ onSwitchToRegister }: LoginPageProps) {
+  const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    const { error: signInError } = await signIn(email, password);
+
+    setLoading(false);
+    if (signInError) setError(signInError);
+  };
 
   return (
     <div className="min-h-screen flex">
@@ -103,7 +116,7 @@ export default function LoginPage({ onSwitchToRegister }: LoginPageProps) {
           )}
 
           {/* Form */}
-          <form className="space-y-5">
+          <form className="space-y-5" onSubmit={handleSubmit}>
             {/* Email */}
             <div>
               <label className="block text-[13px] font-semibold text-slate-700 mb-1.5">Email Address</label>
@@ -112,6 +125,7 @@ export default function LoginPage({ onSwitchToRegister }: LoginPageProps) {
                 <input
                   type="email"
                   required
+                  autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@company.com"
@@ -133,6 +147,7 @@ export default function LoginPage({ onSwitchToRegister }: LoginPageProps) {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
+                  autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"

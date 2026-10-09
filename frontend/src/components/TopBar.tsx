@@ -5,6 +5,7 @@ import type { User } from '../data/mockData';
 interface TopbarProps {
   user: User;
   onMobileMenuClick: () => void;
+  onSignOut: () => void;
 }
 
 const notifications = [
@@ -13,7 +14,7 @@ const notifications = [
   { id: 3, title: 'Upload completed', desc: 'API Architecture Spec is now available', time: '1h ago', unread: false, icon: Check },
 ];
 
-export default function Topbar({ user, onMobileMenuClick }: TopbarProps) {
+export default function Topbar({ user, onMobileMenuClick, onSignOut }: TopbarProps) {
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const unreadCount = notifications.filter((n) => n.unread).length;
@@ -132,7 +133,13 @@ export default function Topbar({ user, onMobileMenuClick }: TopbarProps) {
                     </button>
                   </div>
                   <div className="border-t border-slate-100 py-1.5">
-                    <button className="w-full flex items-center gap-2.5 px-4 py-2 text-[13px] text-rose-600 hover:bg-rose-50 transition-colors">
+                    <button
+                      onClick={() => {
+                        setProfileOpen(false);
+                        onSignOut();
+                      }}
+                      className="w-full flex items-center gap-2.5 px-4 py-2 text-[13px] text-rose-600 hover:bg-rose-50 transition-colors"
+                    >
                       <X className="w-4 h-4" /> Sign Out
                     </button>
                   </div>

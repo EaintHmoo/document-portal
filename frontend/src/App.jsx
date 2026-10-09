@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
-import Sidebar from './components/Sidebar';
-import Topbar from './components/Topbar';
+import Sidebar from './components/SideBar';
+import Topbar from './components/TopBar';
 import Dashboard from './components/Dashboard';
-import { Eye, Shield, Loader2 } from 'lucide-react';
+import { Eye, Loader2 } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
-// type AuthView = 'login' | 'register';
 
 function AuthScreen() {
   const [view, setView] = useState('login');
@@ -31,17 +30,14 @@ function DashboardLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const [activeItem, setActiveItem] = useState('dashboard');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [roleOverride, setRoleOverride] = useState(null);
 
   if (!user) return null;
-
-  const role = roleOverride ?? user.role;
 
   const sidebarUser = {
     id: user.id,
     name: user.name,
     email: user.email,
-    role,
+    role: user.role,
     avatar: '',
     initials: user.initials,
   };
@@ -49,7 +45,7 @@ function DashboardLayout() {
   return (
     <div className="flex min-h-screen bg-slate-50">
       <Sidebar
-        role={role}
+        role={user.role}
         user={sidebarUser}
         collapsed={collapsed}
         onToggleCollapse={() => setCollapsed(!collapsed)}
@@ -68,29 +64,7 @@ function DashboardLayout() {
         />
 
         <main className="flex-1 px-4 sm:px-6 py-6 max-w-7xl mx-auto w-full">
-          {/* Role switcher — demo toggle */}
-          <div className="mb-5 flex items-center gap-2 bg-white border border-slate-200 rounded-xl p-1.5 w-fit">
-            <button
-              onClick={() => { setRoleOverride('admin'); setActiveItem('dashboard'); }}
-              className={`flex items-center gap-2 px-3 py-1.5 text-[13px] font-semibold rounded-lg transition-all ${
-                role === 'admin' ? 'bg-violet-50 text-violet-700' : 'text-slate-500 hover:bg-slate-50'
-              }`}
-            >
-              <Shield className="w-4 h-4" />
-              Admin View
-            </button>
-            <button
-              onClick={() => { setRoleOverride('user'); setActiveItem('dashboard'); }}
-              className={`flex items-center gap-2 px-3 py-1.5 text-[13px] font-semibold rounded-lg transition-all ${
-                role === 'user' ? 'bg-blue-50 text-blue-700' : 'text-slate-500 hover:bg-slate-50'
-              }`}
-            >
-              <Eye className="w-4 h-4" />
-              User View
-            </button>
-          </div>
-
-          {activeItem === 'dashboard' && <Dashboard role={role} />}
+          {activeItem === 'dashboard' && <Dashboard role={user.role} />}
 
           {activeItem !== 'dashboard' && (
             <div className="flex flex-col items-center justify-center py-24 text-center">

@@ -22,6 +22,7 @@ interface SidebarProps {
   onNavigate: (item: string) => void;
   mobileOpen: boolean;
   onMobileClose: () => void;
+  onSignOut: () => void;
 }
 
 interface NavItem {
@@ -48,7 +49,7 @@ const colorMap: Record<string, string> = {
   violet: 'bg-violet-50 text-violet-600',
 };
 
-export default function Sidebar({ role, user, collapsed, onToggleCollapse, activeItem, onNavigate, mobileOpen, onMobileClose }: SidebarProps) {
+export default function Sidebar({ role, user, collapsed, onToggleCollapse, activeItem, onNavigate, mobileOpen, onMobileClose, onSignOut }: SidebarProps) {
   const visibleItems = navItems.filter((item) => item.roles.includes(role));
   const roleColor = role === 'admin' ? 'violet' : 'blue';
 
@@ -157,7 +158,11 @@ export default function Sidebar({ role, user, collapsed, onToggleCollapse, activ
               </div>
             )}
             {!collapsed && (
-              <button className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-md transition-colors" title="Logout">
+              <button
+                onClick={onSignOut}
+                className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-md transition-colors"
+                title="Logout"
+              >
                 <LogOut className="w-4 h-4" />
               </button>
             )}
