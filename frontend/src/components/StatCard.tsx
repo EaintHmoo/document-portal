@@ -13,8 +13,8 @@ import {
 interface StatCardProps {
   label: string;
   value: string | number;
-  change: string;
-  trend: 'up' | 'down' | 'flat';
+  change?: string;
+  trend?: 'up' | 'down' | 'flat';
   icon: string;
   color: string;
 }
@@ -41,6 +41,7 @@ export default function StatCard({ label, value, change, trend, icon, color }: S
   const styles = colorStyles[color] || colorStyles.blue;
   const TrendIcon = trend === 'up' ? TrendingUp : trend === 'down' ? TrendingDown : Minus;
   const trendColor = trend === 'up' ? 'text-emerald-600' : trend === 'down' ? 'text-rose-500' : 'text-slate-400';
+  const showTrend = trend !== undefined && change !== undefined;
 
   return (
     <div className="relative group bg-white border border-slate-200 rounded-xl p-5 hover:shadow-lg hover:shadow-slate-200/50 hover:border-slate-300 transition-all duration-200 overflow-hidden">
@@ -49,10 +50,12 @@ export default function StatCard({ label, value, change, trend, icon, color }: S
         <div className={`w-11 h-11 rounded-xl ${styles.bg} ${styles.text} flex items-center justify-center ring-4 ${styles.ring}`}>
           <Icon className="w-5 h-5" strokeWidth={2.2} />
         </div>
-        <div className={`flex items-center gap-1 text-[11px] font-semibold ${trendColor}`}>
-          <TrendIcon className="w-3.5 h-3.5" />
-          {change}
-        </div>
+        {showTrend && (
+          <div className={`flex items-center gap-1 text-[11px] font-semibold ${trendColor}`}>
+            <TrendIcon className="w-3.5 h-3.5" />
+            {change}
+          </div>
+        )}
       </div>
       <div className="relative">
         <p className="text-2xl font-bold text-slate-800 tracking-tight">{value}</p>

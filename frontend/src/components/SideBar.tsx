@@ -11,11 +11,11 @@ import {
   LogOut,
   Lock,
 } from 'lucide-react';
-import type { Role, User } from '../data/mockData';
+import type { Role, DisplayUser } from '../types';
 
 interface SidebarProps {
   role: Role;
-  user: User;
+  user: DisplayUser;
   collapsed: boolean;
   onToggleCollapse: () => void;
   activeItem: string;

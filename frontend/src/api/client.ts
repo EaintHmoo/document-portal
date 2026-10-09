@@ -43,6 +43,7 @@ interface ApiFetchOptions {
 
 export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): Promise<T> {
   const isMutation = options.method && options.method !== 'GET';
+  const isFormData = options.body instanceof FormData;
 
   if (isMutation) {
     await ensureCsrfCookie();
@@ -53,13 +54,15 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
     credentials: 'include',
     headers: {
       Accept: 'application/json',
-      // Only set Content-Type when there's a body: this header alone is what
-      // forces the browser into a CORS preflight, so a plain GET (e.g. the
-      // session check on app load) skips the extra round trip.
-      ...(options.body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+      // Only set Content-Type when there's a JSON body: this header alone is
+      // what forces the browser into a CORS preflight, so a plain GET (e.g.
+      // the session check on app load) skips the extra round trip. A
+      // FormData body must NOT get this header — the browser needs to set
+      // its own multipart boundary.
+      ...(options.body !== undefined && !isFormData ? { 'Content-Type': 'application/json' } : {}),
       ...(isMutation ? { 'X-XSRF-TOKEN': readCookie('XSRF-TOKEN') ?? '' } : {}),
     },
-    body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+    body: options.body === undefined ? undefined : isFormData ? (options.body as FormData) : JSON.stringify(options.body),
   });
 
   if (response.status === 204) {

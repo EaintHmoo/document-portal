@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Search, Bell, Menu, ChevronDown, Upload, Check, X, FileText, Download } from 'lucide-react';
-import type { User } from '../data/mockData';
+import type { DisplayUser } from '../types';
 
 interface TopbarProps {
-  user: User;
+  user: DisplayUser;
   onMobileMenuClick: () => void;
   onSignOut: () => void;
 }
