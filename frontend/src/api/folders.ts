@@ -7,6 +7,7 @@ export interface ApiFolder {
   name: string;
   description: string | null;
   is_public: boolean;
+  can_upload: boolean;
   document_count: number | null;
   created_by: ApiUser | null;
   created_at: string;

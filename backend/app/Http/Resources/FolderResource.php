@@ -16,6 +16,11 @@ class FolderResource extends JsonResource
             'name' => $this->name,
             'description' => $this->description,
             'is_public' => $this->is_public,
+            // Drives whether the frontend shows an "Upload" affordance for
+            // this folder — reuses the exact same policy check the upload
+            // endpoint itself enforces, so the hint can never drift from
+            // what's actually allowed.
+            'can_upload' => $request->user()?->can('uploadDocument', $this->resource) ?? false,
             'document_count' => $this->whenCounted('documents'),
             'created_by' => $this->whenLoaded('creator', fn () => UserResource::make($this->creator)),
             'created_at' => $this->created_at,

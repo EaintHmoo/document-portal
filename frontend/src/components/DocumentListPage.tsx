@@ -41,6 +41,7 @@ export default function DocumentListPage({
   onUpload, onEdit, onDelete, onDownload,
 }: DocumentListPageProps) {
   const canManage = role === 'admin';
+  const canUploadAnywhere = folders.some((f) => f.can_upload);
   const activeFilterCount = (folderFilter !== 'all' ? 1 : 0) + (extensionFilter !== 'all' ? 1 : 0);
 
   const toggleNameSort = () => onSortChange(sort === 'name_asc' ? 'name_desc' : 'name_asc');
@@ -73,13 +74,15 @@ export default function DocumentListPage({
             {activeFilterCount > 0 && ` · ${activeFilterCount} filter${activeFilterCount > 1 ? 's' : ''} active`}
           </p>
         </div>
-        <button
-          onClick={onUpload}
-          className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold text-white bg-slate-800 hover:bg-slate-900 rounded-lg transition-all shadow-sm active:scale-[0.98]"
-        >
-          <Upload className="w-4 h-4" />
-          Upload
-        </button>
+        {canUploadAnywhere && (
+          <button
+            onClick={onUpload}
+            className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold text-white bg-slate-800 hover:bg-slate-900 rounded-lg transition-all shadow-sm active:scale-[0.98]"
+          >
+            <Upload className="w-4 h-4" />
+            Upload
+          </button>
+        )}
       </div>
 
       {/* Toolbar */}
@@ -155,13 +158,15 @@ export default function DocumentListPage({
               ? 'No documents match your current search and filters. Try adjusting them.'
               : 'No documents have been uploaded yet. Upload your first document to get started.'}
           </p>
-          <button
-            onClick={onUpload}
-            className="mt-5 flex items-center gap-2 px-4 py-2 text-[13px] font-semibold text-white bg-slate-800 rounded-lg hover:bg-slate-900 transition-colors"
-          >
-            <Upload className="w-4 h-4" />
-            Upload Document
-          </button>
+          {canUploadAnywhere && (
+            <button
+              onClick={onUpload}
+              className="mt-5 flex items-center gap-2 px-4 py-2 text-[13px] font-semibold text-white bg-slate-800 rounded-lg hover:bg-slate-900 transition-colors"
+            >
+              <Upload className="w-4 h-4" />
+              Upload Document
+            </button>
+          )}
         </div>
       )}
 

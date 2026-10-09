@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\FolderController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
@@ -17,6 +18,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
 
     Route::get('/activity-logs', [ActivityLogController::class, 'index']);
+
+    Route::get('/users', [UserController::class, 'index']);
+    Route::patch('/users/{user}', [UserController::class, 'update']);
 
     Route::apiResource('folders', FolderController::class)->parameters(['folders' => 'folder']);
     Route::get('/folders/{folder}/access', [FolderController::class, 'access']);

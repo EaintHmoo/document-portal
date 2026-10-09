@@ -1,4 +1,4 @@
-import { useState, useRef, type FormEvent } from 'react';
+import { useState, useRef, useEffect, type FormEvent } from 'react';
 import { UploadCloud, X, Loader2, Check, AlertCircle } from 'lucide-react';
 import Modal from '@/components/Modal';
 import { fileTypeColors } from '@/utils/fileTypes';
@@ -46,7 +46,6 @@ export default function UploadDocumentModal({ open, onClose, folders, onUpload }
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
   const reset = () => {
     setFile(null);
     setTitle('');
@@ -56,6 +55,19 @@ export default function UploadDocumentModal({ open, onClose, folders, onUpload }
     setDragging(false);
     setError(null);
   };
+
+  // The modal is mounted (hidden) as soon as the page loads, before the
+  // `folders` list has finished fetching — so the useState initializer
+  // above locks `folderId` at 0 forever if nothing re-seeds it once real
+  // folders exist. Re-seed on every open so the dropdown's default
+  // selection and the actual state always agree, even on the very first
+  // open before Cancel has ever run `reset()`.
+  useEffect(() => {
+    if (open) {
+      setFolderId(folders[0]?.id ?? 0);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const handleClose = () => {
     reset();
@@ -84,7 +96,6 @@ export default function UploadDocumentModal({ open, onClose, folders, onUpload }
       setLoading(false);
     }
   };
-
   return (
     <Modal
       open={open}

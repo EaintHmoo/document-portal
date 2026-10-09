@@ -6,7 +6,7 @@ import FoldersPage from './pages/FoldersPage';
 import DocumentsPage from './pages/DocumentsPage';
 import SettingsPage from './pages/SettingsPage';
 import ActivityLogPage from './pages/ActivityLogPage';
-import ComingSoonPage from './pages/ComingSoonPage';
+import UsersPage from './pages/UsersPage';
 import AppLayout from './layouts/AppLayout';
 import RequireAuth from './routes/RequireAuth';
 import RequireGuest from './routes/RequireGuest';
@@ -31,7 +31,7 @@ function AppRoutes() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/documents" element={<DocumentsPage />} />
           <Route path="/folders" element={<FoldersPage />} />
-          <Route path="/users" element={<ComingSoonPage title="User Management" />} />
+          <Route path="/users" element={<UsersPage />} />
           <Route path="/activity" element={<ActivityLogPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>

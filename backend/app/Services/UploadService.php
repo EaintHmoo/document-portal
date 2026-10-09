@@ -31,8 +31,12 @@ class UploadService
         $fileType = $file->getMimeType();
 
         $generatedName = "document_" . Str::random(6) . "_" . time() . "." . pathinfo($fileName, PATHINFO_EXTENSION);
-        $prefix = config('filesystems.disks.s3.s3_prefix', '');
-        $key = $prefix . '/' . $path . '/' . $generatedName;
+        // An empty prefix must be omitted entirely, not joined in — otherwise
+        // the leading "/" becomes a literal empty-named "folder" at the
+        // bucket root in the S3 console (bucket -> "/" -> documents -> ...).
+        $prefix = trim((string) config('filesystems.disks.s3.s3_prefix', ''), '/');
+        $path = trim($path, '/');
+        $key = ($prefix !== '' ? "{$prefix}/" : '') . "{$path}/{$generatedName}";
 
         $s3Client = new S3Client([
             'version'     => 'latest',

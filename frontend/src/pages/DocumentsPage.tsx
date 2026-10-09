@@ -174,7 +174,7 @@ export default function DocumentsPage() {
       <UploadDocumentModal
         open={modal.type === 'upload'}
         onClose={() => setModal({ type: 'none' })}
-        folders={folders.map((f) => ({ id: f.id, name: f.name }))}
+        folders={folders.filter((f) => f.can_upload).map((f) => ({ id: f.id, name: f.name }))}
         onUpload={handleUpload}
       />
     </>

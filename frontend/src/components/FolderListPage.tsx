@@ -35,6 +35,7 @@ export default function FolderListPage({
   role, folders, onUploadDocument, onNewFolder, onEditFolder, onDeleteFolder, onManageAccess, onOpenFolder,
 }: FolderListPageProps) {
   const canManage = role === 'admin';
+  const canUploadAnywhere = folders.some((f) => f.can_upload);
   const [view, setView] = useState<'grid' | 'table'>('table');
   const [search, setSearch] = useState('');
   const [sortField, setSortField] = useState<SortField>('name');
@@ -92,18 +93,15 @@ export default function FolderListPage({
             New Folder
           </button>
         )}
-        <div className="flex items-start justify-between gap-3">
-            <div className="flex-1" />
-              <button
-                onClick={onUploadDocument}
-                disabled={folders.length === 0}
-                className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold text-white bg-slate-800 hover:bg-slate-900 rounded-lg transition-all shadow-sm active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                <Upload
-                className="w-4 h-4" />
-                Upload Document
-              </button>
-            </div>
+        {canUploadAnywhere && (
+          <button
+            onClick={onUploadDocument}
+            className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold text-white bg-slate-800 hover:bg-slate-900 rounded-lg transition-all shadow-sm active:scale-[0.98]"
+          >
+            <Upload className="w-4 h-4" />
+            Upload Document
+          </button>
+        )}
         </div>
       </div>
 

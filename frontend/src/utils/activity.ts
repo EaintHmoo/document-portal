@@ -1,7 +1,7 @@
 import type { ComponentType } from 'react';
 import {
   Activity as ActivityIcon, LogIn, LogOut, UserPlus, Upload, Pencil,
-  Download, Trash2, FolderPlus, Lock,
+  Download, Trash2, FolderPlus, Lock, UserCheck, UserX, ShieldCheck,
 } from 'lucide-react';
 import type { ApiActivityLog } from '../api/dashboard';
 
@@ -17,6 +17,9 @@ export const actionMeta: Record<string, { icon: ComponentType<{ className?: stri
   'folder.updated': { icon: Pencil, bg: 'bg-amber-50', text: 'text-amber-600', verb: 'updated folder', label: 'Folder updated' },
   'folder.deleted': { icon: Trash2, bg: 'bg-rose-50', text: 'text-rose-600', verb: 'deleted folder', label: 'Folder deleted' },
   'folder.access_updated': { icon: Lock, bg: 'bg-indigo-50', text: 'text-indigo-600', verb: 'updated access for folder', label: 'Folder access updated' },
+  'user.activated': { icon: UserCheck, bg: 'bg-emerald-50', text: 'text-emerald-600', verb: 'unblocked', label: 'User unblocked' },
+  'user.deactivated': { icon: UserX, bg: 'bg-rose-50', text: 'text-rose-600', verb: 'blocked', label: 'User blocked' },
+  'user.role_changed': { icon: ShieldCheck, bg: 'bg-violet-50', text: 'text-violet-600', verb: 'changed the role of', label: 'Role changed' },
 };
 
 export const fallbackActionMeta = {

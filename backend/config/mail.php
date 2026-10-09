@@ -45,7 +45,11 @@ return [
             'port' => env('MAIL_PORT', 2525),
             'username' => env('MAIL_USERNAME'),
             'password' => env('MAIL_PASSWORD'),
-            'timeout' => null,
+            // A block/unblock request shouldn't hang on a slow or unreachable
+            // mail server — the DB change is already committed by the time
+            // we try to notify the user, so a bounded timeout here just
+            // keeps the HTTP response snappy if SMTP is having a bad day.
+            'timeout' => env('MAIL_TIMEOUT', 10),
             'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
         ],
 

@@ -9,7 +9,7 @@ class UserFilter extends Filters
 	 */
 	protected $filters = [
 		'keyword',
-		'role_id',
+		'role',
 		'is_active',
 	];
 
@@ -25,11 +25,13 @@ class UserFilter extends Filters
 	}
 
 	/**
-	 * Filter by role.
+	 * Filter by role slug ("admin" or "user").
 	 */
-	public function role_id($value)
+	public function role($value)
 	{
-		return $this->builder->where('role_id', $value);
+		return $this->builder->whereHas('role', function ($query) use ($value) {
+			$query->where('slug', $value);
+		});
 	}
 
 	/**
