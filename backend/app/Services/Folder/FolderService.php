@@ -47,13 +47,18 @@ class FolderService
     }
 
     /**
-     * @throws ConflictException if the folder still has documents in it —
+     * @throws ConflictException if the folder still has subfolders (they'd
+     *         be orphaned under a soft-deleted parent) or documents in it —
      *         the DB's restrictOnDelete FK would reject this anyway, but
      *         checking first gives the caller a clean 409 instead of a
      *         500 from a raw constraint violation.
      */
     public function delete(Folder $folder, User $deleter): void
     {
+        if ($this->repository->hasChildren($folder)) {
+            throw new ConflictException('This folder still has subfolders in it and cannot be deleted.');
+        }
+
         if ($this->repository->hasDocuments($folder)) {
             throw new ConflictException('This folder still has documents in it and cannot be deleted.');
         }

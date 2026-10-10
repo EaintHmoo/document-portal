@@ -1,3 +1,8 @@
+/** Mirrors the backend's `max:20480` (KB) upload rule. */
+export const MAX_UPLOAD_BYTES = 20 * 1024 * 1024;
+
+export const MAX_UPLOAD_ERROR = 'This file is larger than 20 MB, the maximum document size.';
+
 export const SUPPORTED_EXTENSIONS = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'] as const;
 
 export const fileTypeColors: Record<string, { bg: string; text: string; border: string }> = {

@@ -60,7 +60,7 @@ export function createFolder(data: {
 
 export function updateFolder(
   id: number,
-  data: Partial<{ name: string; description: string; is_public: boolean }>,
+  data: Partial<{ name: string; description: string; is_public: boolean; parent_id: number | null }>,
 ): Promise<ApiFolder> {
   return apiFetch<FolderEnvelope>(`/api/folders/${id}`, { method: 'PATCH', body: data }).then((res) => res.data);
 }

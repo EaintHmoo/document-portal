@@ -19,4 +19,6 @@ interface FolderRepositoryInterface
     public function delete(Folder $folder): void;
 
     public function hasDocuments(Folder $folder): bool;
+
+    public function hasChildren(Folder $folder): bool;
 }

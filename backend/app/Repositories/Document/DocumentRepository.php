@@ -5,8 +5,10 @@ namespace App\Repositories\Document;
 use App\Filters\DocumentFilter;
 use App\Models\Document;
 use App\Models\User;
+use DateTimeInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 class DocumentRepository implements DocumentRepositoryInterface
 {
@@ -60,5 +62,25 @@ class DocumentRepository implements DocumentRepositoryInterface
     public function delete(Document $document): void
     {
         $document->delete();
+    }
+
+    public function eachTrashedBefore(DateTimeInterface $cutoff, callable $callback): void
+    {
+        Document::onlyTrashed()
+            ->where('deleted_at', '<=', $cutoff)
+            ->with('versions')
+            ->chunkById(100, fn (Collection $documents) => $documents->each($callback));
+    }
+
+    /**
+     * Versions first: their FK nulls documents.current_version_id on the
+     * way out, so the document row itself can then go cleanly.
+     */
+    public function forceDelete(Document $document): void
+    {
+        DB::transaction(function () use ($document) {
+            $document->versions()->delete();
+            $document->forceDelete();
+        });
     }
 }

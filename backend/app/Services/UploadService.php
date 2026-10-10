@@ -17,17 +17,30 @@ class UploadService
      * from the database is the source of truth, so a transient S3 failure
      * here shouldn't block that — it just leaves an orphaned object behind,
      * logged for manual cleanup instead of surfacing as a 500.
+     *
+     * Returns whether the object is gone, so callers that must not lose
+     * track of it (the purge command) can retry later instead.
      */
-    public function deleteFile($storageKey)
+    public function deleteFile($storageKey): bool
     {
         if (!$storageKey) {
-            return;
+            return true;
         }
 
         try {
-            Storage::disk('s3')->delete($storageKey);
+            // The s3 disk has 'throw' => false, so failures surface as false
+            // here rather than as an exception.
+            if (Storage::disk('s3')->delete($storageKey)) {
+                return true;
+            }
+
+            Log::warning('Failed to delete S3 object.', ['key' => $storageKey]);
+
+            return false;
         } catch (Throwable $e) {
             Log::warning('Failed to delete S3 object.', ['key' => $storageKey, 'error' => $e->getMessage()]);
+
+            return false;
         }
     }
 

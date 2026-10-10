@@ -50,6 +50,26 @@ class Folder extends Model
             ->withTimestamps();
     }
 
+    /**
+     * True when $candidate is this folder or sits anywhere beneath it —
+     * used to stop a folder being moved inside itself, which would detach
+     * the whole branch from the tree as a cycle.
+     */
+    public function isSelfOrAncestorOf(Folder $candidate): bool
+    {
+        $visited = [];
+
+        for ($current = $candidate; $current && ! isset($visited[$current->id]); $current = $current->parent) {
+            if ($current->id === $this->id) {
+                return true;
+            }
+
+            $visited[$current->id] = true;
+        }
+
+        return false;
+    }
+
     /** Same visibility rule as Document::scopeAccessibleBy — kept in sync deliberately. */
     public function scopeAccessibleBy(Builder $query, User $user): Builder
     {

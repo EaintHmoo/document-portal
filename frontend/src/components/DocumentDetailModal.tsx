@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import Modal from '@/components/Modal';
 import type { ApiDocument, ApiDocumentVersion } from '@/api/documents';
-import { fileTypeColors, defaultFileColor } from '@/utils/fileTypes';
+import { fileTypeColors, defaultFileColor, MAX_UPLOAD_BYTES, MAX_UPLOAD_ERROR } from '@/utils/fileTypes';
 import { formatBytes, formatDate } from '@/utils/format';
 
 interface DocumentDetailModalProps {
@@ -47,6 +47,11 @@ export default function DocumentDetailModal({
 
   const handleFileSelected = async (file: File | null) => {
     if (!file) return;
+    if (file.size > MAX_UPLOAD_BYTES) {
+      setUploadError(MAX_UPLOAD_ERROR);
+      if (inputRef.current) inputRef.current.value = '';
+      return;
+    }
     setUploading(true);
     setUploadError(null);
     try {

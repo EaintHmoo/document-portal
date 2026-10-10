@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import FolderListPage from '../components/FolderListPage';
 import FolderFormModal, { type FolderFormData } from '../components/FolderFormModal';
 import FolderAccessModal from '../components/FolderAccessModal';
@@ -11,6 +11,7 @@ import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../api/client';
 import { fetchFolders, createFolder, updateFolder, deleteFolder, type ApiFolder } from '../api/folders';
 import { uploadDocument } from '../api/documents';
+import { folderOptions } from '../utils/folders';
 
 type ModalState =
   | { type: 'none' }
@@ -23,6 +24,7 @@ type ModalState =
 export default function FoldersPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [folders, setFolders] = useState<ApiFolder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,6 +47,14 @@ export default function FoldersPage() {
 
   if (!user) return null;
 
+  // An id the user can't see (deleted, or access revoked) falls back to the top level.
+  const parentParam = Number(searchParams.get('parent'));
+  const currentFolder = folders.find((f) => f.id === parentParam) ?? null;
+
+  const navigateTo = (folderId: number | null) => {
+    setSearchParams(folderId === null ? {} : { parent: String(folderId) });
+  };
+
   const handleCreate = async (data: FolderFormData) => {
     await createFolder(data);
     await load();
@@ -52,7 +62,9 @@ export default function FoldersPage() {
 
   const handleEdit = async (data: FolderFormData) => {
     if (modal.type !== 'edit') return;
-    await updateFolder(modal.folder.id, data);
+    const { parent_id, ...fields } = data;
+    // Only send parent_id when it actually changes: moving is admin-only on the API.
+    await updateFolder(modal.folder.id, parent_id === modal.folder.parent_id ? fields : data);
     await load();
   };
 
@@ -98,12 +110,14 @@ export default function FoldersPage() {
         <FolderListPage
           role={user.role}
           folders={folders}
+          currentFolder={currentFolder}
+          onNavigate={navigateTo}
+          onViewDocuments={(folder) => navigate(`/documents?folder_id=${folder.id}`)}
           onUploadDocument={() => setModal({ type: 'upload'})}
           onNewFolder={() => setModal({ type: 'create' })}
           onEditFolder={(folder) => setModal({ type: 'edit', folder })}
           onDeleteFolder={(folder) => setModal({ type: 'delete', folder })}
           onManageAccess={(folder) => setModal({ type: 'access', folder })}
-          onOpenFolder={(folder) => navigate(`/documents?folder_id=${folder.id}`)}
         />
       )}
 
@@ -111,6 +125,9 @@ export default function FoldersPage() {
         open={modal.type === 'create'}
         onClose={() => setModal({ type: 'none' })}
         mode="create"
+        folders={folders}
+        defaultParentId={currentFolder?.id ?? null}
+        canChooseParent={user.role === 'admin'}
         onSubmit={handleCreate}
       />
 
@@ -119,6 +136,8 @@ export default function FoldersPage() {
         onClose={() => setModal({ type: 'none' })}
         mode="edit"
         folder={modal.type === 'edit' ? modal.folder : null}
+        folders={folders}
+        canChooseParent={user.role === 'admin'}
         onSubmit={handleEdit}
       />
 
@@ -138,7 +157,8 @@ export default function FoldersPage() {
       <UploadDocumentModal
         open={modal.type === 'upload'}
         onClose={() => setModal({ type: 'none' })}
-        folders={folders.filter((f) => f.can_upload).map((f) => ({ id: f.id, name: f.name }))}
+        folders={folderOptions(folders, (f) => f.can_upload)}
+        defaultFolderId={currentFolder?.id ?? null}
         onUpload={handleUpload}
       />
     </div>

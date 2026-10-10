@@ -14,6 +14,7 @@ import {
   type ApiDocument, type ApiDocumentVersion, type DocumentListParams,
 } from '../api/documents';
 import { fetchFolders, type ApiFolder } from '../api/folders';
+import { folderOptions } from '../utils/folders';
 
 type ModalState =
   | { type: 'none' }
@@ -233,7 +234,7 @@ export default function DocumentsPage() {
       <UploadDocumentModal
         open={modal.type === 'upload'}
         onClose={() => setModal({ type: 'none' })}
-        folders={folders.filter((f) => f.can_upload).map((f) => ({ id: f.id, name: f.name }))}
+        folders={folderOptions(folders, (f) => f.can_upload)}
         onUpload={handleUpload}
       />
     </>

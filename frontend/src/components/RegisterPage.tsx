@@ -1,7 +1,12 @@
 import { useState, type FormEvent } from 'react';
-import { Shield, Mail, Lock, User, Eye, EyeOff, ArrowRight, AlertCircle, Loader2, Check } from 'lucide-react';
+import { Shield, Mail, Lock, User, Eye, EyeOff, ArrowRight, ArrowLeft, AlertCircle, Loader2, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { ApiError } from '../api/client';
+import { sendRegisterOtp } from '../api/auth';
+import OtpCodeField from './OtpCodeField';
+import PasswordChecklist from './PasswordChecklist';
+import { isStrongPassword } from '../utils/password';
 
 export default function RegisterPage() {
   const { signUp } = useAuth();
@@ -13,18 +18,22 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  // Step 1 collects details and emails a code; step 2 verifies the code and creates the account.
+  const [step, setStep] = useState<'details' | 'verify'>('details');
+  const [otp, setOtp] = useState('');
+  const [resendIn, setResendIn] = useState(0);
 
-  const passwordChecks = [
-    { label: 'At least 8 characters', valid: password.length >= 8 },
-    { label: 'Contains uppercase letter', valid: /[A-Z]/.test(password) },
-    { label: 'Contains a number', valid: /\d/.test(password) },
-  ];
+  const requestCode = async () => {
+    const response = await sendRegisterOtp(email);
+    setResendIn(response.resend_in);
+    return response.resend_in;
+  };
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleDetailsSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
 
-    if (!passwordChecks.every((check) => check.valid)) {
+    if (!isStrongPassword(password)) {
       setError('Please meet all password requirements.');
       return;
     }
@@ -35,7 +44,28 @@ export default function RegisterPage() {
     }
 
     setLoading(true);
-    const { error: signUpError } = await signUp(name, email, password, confirmPassword);
+    try {
+      await requestCode();
+      setOtp('');
+      setStep('verify');
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Could not send a verification code. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifySubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError(null);
+
+    if (otp.length !== 6) {
+      setError('Enter the 6-digit code from your email.');
+      return;
+    }
+
+    setLoading(true);
+    const { error: signUpError } = await signUp(name, email, password, confirmPassword, otp);
     setLoading(false);
 
     if (signUpError) {
@@ -55,7 +85,7 @@ export default function RegisterPage() {
           </div>
           <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Account created!</h2>
           <p className="text-[14px] text-slate-500 mt-2 leading-relaxed">
-            Your account has been set up successfully. You can now sign in with your email and password.
+            Your email is verified and your account is ready. You can now sign in with your email and password.
           </p>
           <Link
             to="/login"
@@ -106,7 +136,7 @@ export default function RegisterPage() {
             <div className="mt-8 space-y-3">
               {[
                 { step: '1', text: 'Create your account with work email' },
-                { step: '2', text: 'Verify your identity and sign in' },
+                { step: '2', text: 'Verify your email with a one-time code' },
                 { step: '3', text: 'Start managing documents securely' },
               ].map((item) => (
                 <div key={item.step} className="flex items-center gap-3">
@@ -145,8 +175,14 @@ export default function RegisterPage() {
 
           {/* Header */}
           <div className="mb-7">
-            <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Create your account</h2>
-            <p className="text-[14px] text-slate-500 mt-1.5">Get started with your team's document portal</p>
+            <h2 className="text-2xl font-bold text-slate-800 tracking-tight">
+              {step === 'details' ? 'Create your account' : 'Verify your email'}
+            </h2>
+            <p className="text-[14px] text-slate-500 mt-1.5">
+              {step === 'details'
+                ? "Get started with your team's document portal"
+                : 'One last step: confirm this email address belongs to you'}
+            </p>
           </div>
 
           {/* Error alert */}
@@ -157,8 +193,49 @@ export default function RegisterPage() {
             </div>
           )}
 
+          {step === 'verify' && (
+            <form className="space-y-5" onSubmit={handleVerifySubmit}>
+              <OtpCodeField
+                value={otp}
+                onChange={setOtp}
+                email={email}
+                resendIn={resendIn}
+                onResend={requestCode}
+                onResendError={setError}
+              />
+
+              <button
+                type="submit"
+                disabled={loading || otp.length !== 6}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 text-[14px] font-semibold text-white bg-slate-800 hover:bg-slate-900 rounded-xl transition-all shadow-sm active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Verifying...
+                  </>
+                ) : (
+                  <>
+                    Verify & Create Account
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => { setStep('details'); setError(null); }}
+                className="w-full flex items-center justify-center gap-1.5 text-[13px] font-medium text-slate-500 hover:text-slate-700 transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to edit your details
+              </button>
+            </form>
+          )}
+
           {/* Form */}
-          <form className="space-y-4" onSubmit={handleSubmit}>
+          {step === 'details' && (
+          <form className="space-y-4" onSubmit={handleDetailsSubmit}>
             {/* Name */}
             <div>
               <label className="block text-[13px] font-semibold text-slate-700 mb-1.5">Full Name</label>
@@ -217,24 +294,7 @@ export default function RegisterPage() {
               </div>
 
               {/* Password strength indicators */}
-              {password.length > 0 && (
-                <div className="mt-2.5 space-y-1.5">
-                  {passwordChecks.map((check) => (
-                    <div key={check.label} className="flex items-center gap-2">
-                      <span
-                        className={`flex items-center justify-center w-4 h-4 rounded-full transition-colors ${
-                          check.valid ? 'bg-emerald-500' : 'bg-slate-200'
-                        }`}
-                      >
-                        <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
-                      </span>
-                      <span className={`text-[11px] font-medium ${check.valid ? 'text-emerald-600' : 'text-slate-400'}`}>
-                        {check.label}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <PasswordChecklist password={password} />
             </div>
 
             {/* Confirm password */}
@@ -273,16 +333,17 @@ export default function RegisterPage() {
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Creating account...
+                  Sending code...
                 </>
               ) : (
                 <>
-                  Create Account
+                  Continue
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
             </button>
           </form>
+          )}
 
           {/* Switch to login */}
           <p className="mt-6 text-center text-[13px] text-slate-500">

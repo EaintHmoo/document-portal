@@ -10,6 +10,7 @@ use App\Models\Folder;
 use App\Models\User;
 use App\Repositories\Document\DocumentRepositoryInterface;
 use App\Services\UploadService;
+use DateTimeInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
@@ -186,6 +187,43 @@ class DocumentService
         ], $actor);
 
         return $document;
+    }
+
+    /**
+     * Permanently removes documents soft-deleted at or before $cutoff:
+     * every version's S3 object, then the database rows. A document is
+     * only removed from the database once all of its objects are gone, so
+     * a failed S3 delete leaves it in place for the next run to retry
+     * instead of orphaning files nothing points to anymore.
+     *
+     * @return array{purged: int, failed: int}
+     */
+    public function purgeDeletedBefore(DateTimeInterface $cutoff): array
+    {
+        $result = ['purged' => 0, 'failed' => 0];
+
+        $this->repository->eachTrashedBefore($cutoff, function (Document $document) use (&$result) {
+            $filesRemoved = $document->versions->every(
+                fn (DocumentVersion $version) => $this->uploadService->deleteFile($version->storage_key),
+            );
+
+            if (! $filesRemoved) {
+                $result['failed']++;
+
+                return;
+            }
+
+            $this->repository->forceDelete($document);
+
+            ActivityLog::record('document.purged', $document, [
+                'title' => $document->title,
+                'versions' => $document->versions->count(),
+            ]);
+
+            $result['purged']++;
+        });
+
+        return $result;
     }
 
     private function putFile(UploadedFile $file, string $documentUuid, int $versionNumber): string

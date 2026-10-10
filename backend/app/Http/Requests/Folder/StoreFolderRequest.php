@@ -16,7 +16,7 @@ class StoreFolderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'parent_id' => ['nullable', 'integer', 'exists:folders,id'],
+            'parent_id' => ['nullable', 'integer', Rule::exists('folders', 'id')->whereNull('deleted_at')],
             'name' => [
                 'required', 'string', 'max:255',
                 Rule::unique('folders', 'name')->where('parent_id', $this->input('parent_id')),

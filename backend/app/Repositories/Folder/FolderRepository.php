@@ -44,4 +44,9 @@ class FolderRepository implements FolderRepositoryInterface
     {
         return $folder->documents()->exists();
     }
+
+    public function hasChildren(Folder $folder): bool
+    {
+        return $folder->children()->exists();
+    }
 }

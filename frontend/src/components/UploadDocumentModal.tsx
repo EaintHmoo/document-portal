@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, type FormEvent } from 'react';
 import { UploadCloud, X, Loader2, Check, AlertCircle } from 'lucide-react';
 import Modal from '@/components/Modal';
-import { fileTypeColors } from '@/utils/fileTypes';
+import { fileTypeColors, MAX_UPLOAD_BYTES, MAX_UPLOAD_ERROR } from '@/utils/fileTypes';
 
 export interface UploadDocumentData {
   file: File;
@@ -14,6 +14,8 @@ interface UploadDocumentModalProps {
   open: boolean;
   onClose: () => void;
   folders: { id: number; name: string }[];
+  /** Preselected folder (e.g. the one being browsed), if it's in `folders`. */
+  defaultFolderId?: number | null;
   onUpload: (data: UploadDocumentData) => Promise<void>;
 }
 
@@ -37,11 +39,12 @@ function titleFromFilename(filename: string): string {
   return filename.replace(/\.[^.]+$/, '');
 }
 
-export default function UploadDocumentModal({ open, onClose, folders, onUpload }: UploadDocumentModalProps) {
+export default function UploadDocumentModal({ open, onClose, folders, defaultFolderId, onUpload }: UploadDocumentModalProps) {
+  const initialFolderId = folders.some((f) => f.id === defaultFolderId) ? defaultFolderId! : folders[0]?.id ?? 0;
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [folderId, setFolderId] = useState(folders[0]?.id ?? 0);
+  const [folderId, setFolderId] = useState(initialFolderId);
   const [loading, setLoading] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +53,7 @@ export default function UploadDocumentModal({ open, onClose, folders, onUpload }
     setFile(null);
     setTitle('');
     setDescription('');
-    setFolderId(folders[0]?.id ?? 0);
+    setFolderId(initialFolderId);
     setLoading(false);
     setDragging(false);
     setError(null);
@@ -64,7 +67,7 @@ export default function UploadDocumentModal({ open, onClose, folders, onUpload }
   // open before Cancel has ever run `reset()`.
   useEffect(() => {
     if (open) {
-      setFolderId(folders[0]?.id ?? 0);
+      setFolderId(initialFolderId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -76,6 +79,12 @@ export default function UploadDocumentModal({ open, onClose, folders, onUpload }
 
   const handleFileSelect = (selected: File | null) => {
     if (!selected) return;
+    if (selected.size > MAX_UPLOAD_BYTES) {
+      setError(MAX_UPLOAD_ERROR);
+      if (inputRef.current) inputRef.current.value = '';
+      return;
+    }
+    setError(null);
     setFile(selected);
     if (!title) setTitle(titleFromFilename(selected.name));
   };

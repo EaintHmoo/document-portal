@@ -14,7 +14,7 @@ interface AuthContextValue {
   user: AuthUser | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
-  signUp: (name: string, email: string, password: string, passwordConfirmation: string) => Promise<{ error: string | null }>;
+  signUp: (name: string, email: string, password: string, passwordConfirmation: string, otp: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
 }
 
@@ -71,9 +71,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signUp = async (name: string, email: string, password: string, passwordConfirmation: string) => {
+  const signUp = async (name: string, email: string, password: string, passwordConfirmation: string, otp: string) => {
     try {
-      await register(name, email, password, passwordConfirmation);
+      await register(name, email, password, passwordConfirmation, otp);
       return { error: null };
     } catch (err) {
       return { error: toErrorMessage(err, 'Could not create your account. Please try again.') };

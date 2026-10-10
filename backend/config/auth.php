@@ -114,4 +114,22 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Email One-Time Codes
+    |--------------------------------------------------------------------------
+    |
+    | Six-digit codes emailed to verify an address at registration and to
+    | authorise a forgotten-password reset. A code dies after `max_attempts`
+    | wrong guesses or `expires_minutes`, whichever comes first, and a new
+    | one can only be requested every `resend_seconds` per email address.
+    |
+    */
+
+    'otp' => [
+        'expires_minutes' => (int) env('OTP_EXPIRES_MINUTES', 10),
+        'max_attempts' => (int) env('OTP_MAX_ATTEMPTS', 5),
+        'resend_seconds' => (int) env('OTP_RESEND_SECONDS', 60),
+    ],
+
 ];

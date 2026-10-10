@@ -67,20 +67,6 @@ export default function LoginPage() {
               ))}
             </div>
           </div>
-
-          {/* Bottom stats */}
-          <div className="flex gap-8">
-            {[
-              { label: 'Documents', value: '1,284' },
-              { label: 'Active Users', value: '247' },
-              { label: 'Folders', value: '6' },
-            ].map((stat) => (
-              <div key={stat.label}>
-                <p className="text-2xl font-bold">{stat.value}</p>
-                <p className="text-[12px] text-slate-400 mt-0.5">{stat.label}</p>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
 
@@ -135,9 +121,9 @@ export default function LoginPage() {
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="block text-[13px] font-semibold text-slate-700">Password</label>
-                <button type="button" className="text-[12px] font-medium text-slate-500 hover:text-slate-700 transition-colors">
+                <Link to="/forgot-password" className="text-[12px] font-medium text-slate-500 hover:text-slate-700 transition-colors">
                   Forgot password?
-                </button>
+                </Link>
               </div>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-slate-400" />

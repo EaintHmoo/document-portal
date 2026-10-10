@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Bell, Menu, ChevronDown, Check, X, FileText, Download } from 'lucide-react';
 import type { DisplayUser } from '../types';
+import { Link } from 'react-router-dom';
 
 interface TopbarProps {
   user: DisplayUser;
@@ -111,12 +112,12 @@ export default function Topbar({ user, onMobileMenuClick, onSignOut }: TopbarPro
                     <p className="text-[12px] text-slate-400 truncate">{user.email}</p>
                   </div>
                   <div className="py-1.5">
-                    <button className="w-full flex items-center gap-2.5 px-4 py-2 text-[13px] text-slate-600 hover:bg-slate-50 transition-colors">
+                    <Link to="/documents" className="w-full flex items-center gap-2.5 px-4 py-2 text-[13px] text-slate-600 hover:bg-slate-50 transition-colors">
                       <FileText className="w-4 h-4 text-slate-400" /> My Documents
-                    </button>
-                    <button className="w-full flex items-center gap-2.5 px-4 py-2 text-[13px] text-slate-600 hover:bg-slate-50 transition-colors">
+                    </Link>
+                    <Link to="/settings" className="w-full flex items-center gap-2.5 px-4 py-2 text-[13px] text-slate-600 hover:bg-slate-50 transition-colors">
                       <Check className="w-4 h-4 text-slate-400" /> Account Settings
-                    </button>
+                    </Link>
                   </div>
                   <div className="border-t border-slate-100 py-1.5">
                     <button

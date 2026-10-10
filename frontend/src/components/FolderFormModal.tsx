@@ -1,12 +1,14 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { FolderPlus, Pencil, Loader2, Globe, Lock, AlertCircle } from 'lucide-react';
 import Modal from '@/components/Modal';
 import type { ApiFolder } from '@/api/folders';
+import { buildFolderIndex, folderOptions } from '@/utils/folders';
 
 export interface FolderFormData {
   name: string;
   description: string;
   is_public: boolean;
+  parent_id: number | null;
 }
 
 interface FolderFormModalProps {
@@ -14,13 +16,23 @@ interface FolderFormModalProps {
   onClose: () => void;
   mode: 'create' | 'edit';
   folder?: ApiFolder | null;
+  /** Every folder the user can see — the parent picker's options. */
+  folders: ApiFolder[];
+  /** Parent preselected when creating (the folder currently being browsed). */
+  defaultParentId?: number | null;
+  /** Moving folders is admin-only; without it the parent picker is hidden. */
+  canChooseParent: boolean;
   onSubmit: (data: FolderFormData) => Promise<void>;
 }
 
-export default function FolderFormModal({ open, onClose, mode, folder, onSubmit }: FolderFormModalProps) {
+export default function FolderFormModal({
+  open, onClose, mode, folder, folders, defaultParentId = null, canChooseParent, onSubmit,
+}: FolderFormModalProps) {
+  const initialParentId = mode === 'edit' ? folder?.parent_id ?? null : defaultParentId;
   const [name, setName] = useState(folder?.name ?? '');
   const [description, setDescription] = useState(folder?.description ?? '');
   const [isPublic, setIsPublic] = useState(folder?.is_public ?? false);
+  const [parentId, setParentId] = useState<number | null>(initialParentId);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,8 +42,22 @@ export default function FolderFormModal({ open, onClose, mode, folder, onSubmit 
     setName(folder?.name ?? '');
     setDescription(folder?.description ?? '');
     setIsPublic(folder?.is_public ?? false);
+    setParentId(initialParentId);
     setError(null);
   };
+
+  // The modal stays mounted between uses, so re-seed the fields from the
+  // folder being edited (or the folder being browsed) every time it opens.
+  useEffect(() => {
+    if (open) reset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, folder?.id, defaultParentId]);
+
+  // A folder can't move into itself or its own subfolders.
+  const parentOptions = useMemo(() => {
+    const excluded = folder ? buildFolderIndex(folders).selfAndDescendantIds(folder.id) : new Set<number>();
+    return folderOptions(folders, (f) => !excluded.has(f.id));
+  }, [folders, folder]);
 
   const handleClose = () => {
     reset();
@@ -45,7 +71,7 @@ export default function FolderFormModal({ open, onClose, mode, folder, onSubmit 
     setLoading(true);
     setError(null);
     try {
-      await onSubmit({ name: name.trim(), description: description.trim(), is_public: isPublic });
+      await onSubmit({ name: name.trim(), description: description.trim(), is_public: isPublic, parent_id: parentId });
       reset();
       onClose();
     } catch (err) {
@@ -108,6 +134,26 @@ export default function FolderFormModal({ open, onClose, mode, folder, onSubmit 
             className="w-full px-4 py-2.5 text-[14px] bg-white border border-slate-200 rounded-xl placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 outline-none transition-all"
           />
         </div>
+
+        {/* Parent folder */}
+        {canChooseParent && (
+          <div>
+            <label className="block text-[13px] font-semibold text-slate-700 mb-1.5">Parent Folder</label>
+            <select
+              value={parentId ?? ''}
+              onChange={(e) => setParentId(e.target.value === '' ? null : Number(e.target.value))}
+              className="w-full px-4 py-2.5 text-[14px] bg-white border border-slate-200 rounded-xl focus:border-slate-400 focus:ring-4 focus:ring-slate-100 outline-none transition-all cursor-pointer"
+            >
+              <option value="">None (top level)</option>
+              {parentOptions.map((f) => (
+                <option key={f.id} value={f.id}>{f.name}</option>
+              ))}
+            </select>
+            <p className="text-[11px] text-slate-400 mt-1.5">
+              Access is set per folder and is not inherited from the parent.
+            </p>
+          </div>
+        )}
 
         {/* Description */}
         <div>

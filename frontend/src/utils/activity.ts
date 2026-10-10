@@ -1,7 +1,7 @@
 import type { ComponentType } from 'react';
 import {
   Activity as ActivityIcon, LogIn, LogOut, UserPlus, Upload, Pencil,
-  Download, Trash2, FolderPlus, Lock, UserCheck, UserX, ShieldCheck, History,
+  Download, Trash2, FolderPlus, Lock, UserCheck, UserX, ShieldCheck, History, KeyRound,
 } from 'lucide-react';
 import type { ApiActivityLog } from '../api/dashboard';
 
@@ -13,6 +13,7 @@ export const actionMeta: Record<string, { icon: ComponentType<{ className?: stri
   'document.updated': { icon: Pencil, bg: 'bg-amber-50', text: 'text-amber-600', verb: 'updated', label: 'Document updated' },
   'document.downloaded': { icon: Download, bg: 'bg-cyan-50', text: 'text-cyan-600', verb: 'downloaded', label: 'Document downloaded' },
   'document.deleted': { icon: Trash2, bg: 'bg-rose-50', text: 'text-rose-600', verb: 'deleted', label: 'Document deleted' },
+  'document.purged': { icon: Trash2, bg: 'bg-rose-50', text: 'text-rose-600', verb: 'permanently removed', label: 'Document purged' },
   'document.version_deleted': { icon: History, bg: 'bg-rose-50', text: 'text-rose-600', verb: 'deleted a version of', label: 'Version deleted' },
   'folder.created': { icon: FolderPlus, bg: 'bg-violet-50', text: 'text-violet-600', verb: 'created folder', label: 'Folder created' },
   'folder.updated': { icon: Pencil, bg: 'bg-amber-50', text: 'text-amber-600', verb: 'updated folder', label: 'Folder updated' },
@@ -20,6 +21,8 @@ export const actionMeta: Record<string, { icon: ComponentType<{ className?: stri
   'folder.access_updated': { icon: Lock, bg: 'bg-indigo-50', text: 'text-indigo-600', verb: 'updated access for folder', label: 'Folder access updated' },
   'user.activated': { icon: UserCheck, bg: 'bg-emerald-50', text: 'text-emerald-600', verb: 'unblocked', label: 'User unblocked' },
   'user.deactivated': { icon: UserX, bg: 'bg-rose-50', text: 'text-rose-600', verb: 'blocked', label: 'User blocked' },
+  'user.password_reset': { icon: KeyRound, bg: 'bg-amber-50', text: 'text-amber-600', verb: 'reset the password for', label: 'Password reset' },
+  'user.password_changed': { icon: KeyRound, bg: 'bg-amber-50', text: 'text-amber-600', verb: 'changed the password for', label: 'Password changed' },
   'user.role_changed': { icon: ShieldCheck, bg: 'bg-violet-50', text: 'text-violet-600', verb: 'changed the role of', label: 'Role changed' },
 };
 

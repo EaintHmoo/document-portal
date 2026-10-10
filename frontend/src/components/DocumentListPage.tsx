@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import type { ApiDocument, DocumentListParams } from '@/api/documents';
 import type { ApiFolder } from '@/api/folders';
+import { folderOptions } from '@/utils/folders';
 import { fileTypeColors, defaultFileColor, SUPPORTED_EXTENSIONS } from '@/utils/fileTypes';
 import { formatBytes, formatDate } from '@/utils/format';
 
@@ -105,7 +106,7 @@ export default function DocumentListPage({
               className="px-3 py-2 text-[13px] font-medium bg-slate-50 border border-slate-200 rounded-lg text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-100 cursor-pointer"
             >
               <option value="all">All Folders</option>
-              {folders.map((f) => (
+              {folderOptions(folders).map((f) => (
                 <option key={f.id} value={f.id}>{f.name}</option>
               ))}
             </select>

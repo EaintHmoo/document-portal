@@ -3,10 +3,11 @@ import {
   Folder as FolderIcon, Search, FolderPlus, LayoutGrid, List, Pencil,
   Trash2, Lock, Globe, ArrowUpDown, ArrowUp, ArrowDown,
   ChevronRight, Inbox, MoreVertical,
-  Upload,
+  Upload, FileText, FolderTree,
 } from 'lucide-react';
 import type { Role } from '@/types';
 import type { ApiFolder } from '@/api/folders';
+import { buildFolderIndex } from '@/utils/folders';
 
 const palette = [
   { bg: 'bg-blue-50 text-blue-600', dot: 'bg-blue-500' },
@@ -17,39 +18,55 @@ const palette = [
   { bg: 'bg-cyan-50 text-cyan-600', dot: 'bg-cyan-500' },
 ];
 
-type SortField = 'name' | 'documentCount';
+type SortField = 'name' | 'documentCount' | 'subfolderCount';
 type SortDir = 'asc' | 'desc';
 
 interface FolderListPageProps {
   role: Role;
+  /** Every folder the user can access — the page derives the tree from it. */
   folders: ApiFolder[];
+  /** The folder being browsed, or null at the top level. */
+  currentFolder: ApiFolder | null;
+  onNavigate: (folderId: number | null) => void;
+  onViewDocuments: (folder: ApiFolder) => void;
   onUploadDocument: () => void;
   onNewFolder: () => void;
   onEditFolder: (folder: ApiFolder) => void;
   onDeleteFolder: (folder: ApiFolder) => void;
   onManageAccess: (folder: ApiFolder) => void;
-  onOpenFolder: (folder: ApiFolder) => void;
 }
 
 export default function FolderListPage({
-  role, folders, onUploadDocument, onNewFolder, onEditFolder, onDeleteFolder, onManageAccess, onOpenFolder,
+  role, folders, currentFolder, onNavigate, onViewDocuments,
+  onUploadDocument, onNewFolder, onEditFolder, onDeleteFolder, onManageAccess,
 }: FolderListPageProps) {
   const canManage = role === 'admin';
   const canUploadAnywhere = folders.some((f) => f.can_upload);
+  const index = useMemo(() => buildFolderIndex(folders), [folders]);
+  const breadcrumb = currentFolder ? index.ancestorsOf(currentFolder.id) : [];
+  const subfolderCount = (folder: ApiFolder) => index.childrenOf(folder.id).length;
   const [view, setView] = useState<'grid' | 'table'>('table');
   const [search, setSearch] = useState('');
   const [sortField, setSortField] = useState<SortField>('name');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
 
+  // Browsing shows the current level only; searching looks across the
+  // whole tree (with each match's path shown) so nested folders stay findable.
   const filtered = useMemo(() => {
-    const result = folders.filter((f) => f.name.toLowerCase().includes(search.toLowerCase()));
+    const term = search.trim().toLowerCase();
+    const result = term
+      ? folders.filter((f) => f.name.toLowerCase().includes(term))
+      : [...index.childrenOf(currentFolder?.id ?? null)];
+    const countFor = (f: ApiFolder) =>
+      sortField === 'documentCount' ? f.document_count ?? 0 : index.childrenOf(f.id).length;
     result.sort((a, b) => {
-      const cmp =
-        sortField === 'name' ? a.name.localeCompare(b.name) : (a.document_count ?? 0) - (b.document_count ?? 0);
+      const cmp = sortField === 'name' ? a.name.localeCompare(b.name) : countFor(a) - countFor(b);
       return sortDir === 'asc' ? cmp : -cmp;
     });
     return result;
-  }, [folders, search, sortField, sortDir]);
+  }, [folders, index, currentFolder, search, sortField, sortDir]);
+
+  const parentPath = (folder: ApiFolder) => index.ancestorsOf(folder.id).map((f) => f.name).join(' / ');
 
   const toggleSort = (field: SortField) => {
     if (sortField === field) {
@@ -72,25 +89,55 @@ export default function FolderListPage({
       {/* Page header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2 text-[12px] text-slate-400 mb-1">
-            <span>Dashboard</span>
-            <ChevronRight className="w-3.5 h-3.5" />
-            <span className="text-slate-600 font-medium">Folders</span>
-          </div>
-          <h1 className="text-xl font-bold text-slate-800 tracking-tight">Folder Management</h1>
+          <nav aria-label="Folder path" className="flex flex-wrap items-center gap-1.5 text-[12px] text-slate-400 mb-1">
+            {currentFolder ? (
+              <button onClick={() => onNavigate(null)} className="hover:text-slate-700 transition-colors">
+                Folders
+              </button>
+            ) : (
+              <span className="text-slate-600 font-medium">Folders</span>
+            )}
+            {breadcrumb.map((ancestor) => (
+              <span key={ancestor.id} className="flex items-center gap-1.5">
+                <ChevronRight className="w-3.5 h-3.5" />
+                <button onClick={() => onNavigate(ancestor.id)} className="hover:text-slate-700 transition-colors">
+                  {ancestor.name}
+                </button>
+              </span>
+            ))}
+            {currentFolder && (
+              <span className="flex items-center gap-1.5">
+                <ChevronRight className="w-3.5 h-3.5" />
+                <span className="text-slate-600 font-medium">{currentFolder.name}</span>
+              </span>
+            )}
+          </nav>
+          <h1 className="text-xl font-bold text-slate-800 tracking-tight">
+            {currentFolder ? currentFolder.name : 'Folder Management'}
+          </h1>
           <p className="text-[13px] text-slate-400 mt-0.5">
-            {filtered.length} {filtered.length === 1 ? 'folder' : 'folders'}
+            {filtered.length} {currentFolder && !search ? 'sub' : ''}{filtered.length === 1 ? 'folder' : 'folders'}
             {search && ` matching "${search}"`}
+            {currentFolder?.description && !search && ` · ${currentFolder.description}`}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+        {currentFolder && (
+          <button
+            onClick={() => onViewDocuments(currentFolder)}
+            className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-lg transition-all shadow-sm active:scale-[0.98]"
+          >
+            <FileText className="w-4 h-4" />
+            View Documents ({currentFolder.document_count ?? 0})
+          </button>
+        )}
         {canManage && (
           <button
             onClick={onNewFolder}
             className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold text-white bg-slate-800 hover:bg-slate-900 rounded-lg transition-all shadow-sm active:scale-[0.98]"
           >
             <FolderPlus className="w-4 h-4" />
-            New Folder
+            {currentFolder ? 'New Subfolder' : 'New Folder'}
           </button>
         )}
         {canUploadAnywhere && (
@@ -113,7 +160,7 @@ export default function FolderListPage({
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search folders by name..."
+            placeholder="Search all folders by name..."
             className="w-full pl-9 pr-4 py-2 text-[13px] bg-slate-50 border border-slate-200 rounded-lg placeholder:text-slate-400 focus:bg-white focus:border-slate-300 focus:ring-2 focus:ring-slate-100 outline-none transition-all"
           />
         </div>
@@ -127,6 +174,7 @@ export default function FolderListPage({
           >
             <option value="name">Name</option>
             <option value="documentCount">Document Count</option>
+            <option value="subfolderCount">Subfolder Count</option>
           </select>
 
           <div className="flex items-center gap-0.5 bg-slate-100 rounded-lg p-0.5">
@@ -154,20 +202,37 @@ export default function FolderListPage({
           <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
             <Inbox className="w-8 h-8 text-slate-300" />
           </div>
-          <h3 className="text-[15px] font-bold text-slate-700">No folders found</h3>
+          <h3 className="text-[15px] font-bold text-slate-700">
+            {!search && currentFolder ? 'No subfolders' : 'No folders found'}
+          </h3>
           <p className="text-[13px] text-slate-400 mt-1 max-w-sm">
             {search
               ? `No folders match "${search}". Try a different search term.`
-              : 'No folders have been created yet. Create your first folder to organize documents.'}
+              : currentFolder
+                ? `"${currentFolder.name}" has no subfolders you can access.`
+                : 'No folders have been created yet. Create your first folder to organize documents.'}
           </p>
-          {canManage && !search && (
-            <button
-              onClick={onNewFolder}
-              className="mt-5 flex items-center gap-2 px-4 py-2 text-[13px] font-semibold text-white bg-slate-800 rounded-lg hover:bg-slate-900 transition-colors"
-            >
-              <FolderPlus className="w-4 h-4" />
-              Create Folder
-            </button>
+          {!search && (
+            <div className="mt-5 flex items-center gap-2">
+              {currentFolder && (
+                <button
+                  onClick={() => onViewDocuments(currentFolder)}
+                  className="flex items-center gap-2 px-4 py-2 text-[13px] font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                >
+                  <FileText className="w-4 h-4" />
+                  View Documents
+                </button>
+              )}
+              {canManage && (
+                <button
+                  onClick={onNewFolder}
+                  className="flex items-center gap-2 px-4 py-2 text-[13px] font-semibold text-white bg-slate-800 rounded-lg hover:bg-slate-900 transition-colors"
+                >
+                  <FolderPlus className="w-4 h-4" />
+                  {currentFolder ? 'Create Subfolder' : 'Create Folder'}
+                </button>
+              )}
+            </div>
           )}
         </div>
       )}
@@ -189,6 +254,11 @@ export default function FolderListPage({
                       Documents <SortIcon field="documentCount" />
                     </button>
                   </th>
+                  <th className="text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider px-3 py-2.5 hidden sm:table-cell">
+                    <button onClick={() => toggleSort('subfolderCount')} className="flex items-center gap-1.5 hover:text-slate-700 transition-colors">
+                      Subfolders <SortIcon field="subfolderCount" />
+                    </button>
+                  </th>
                   <th className="text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider px-3 py-2.5 hidden md:table-cell">Visibility</th>
                   {canManage && <th className="text-right text-[11px] font-semibold text-slate-500 uppercase tracking-wider px-3 py-2.5">Actions</th>}
                 </tr>
@@ -200,7 +270,7 @@ export default function FolderListPage({
                     <tr
                       key={folder.id}
                       className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors group cursor-pointer"
-                      onClick={() => onOpenFolder(folder)}
+                      onClick={() => onNavigate(folder.id)}
                     >
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-3">
@@ -209,13 +279,26 @@ export default function FolderListPage({
                           </div>
                           <div className="min-w-0">
                             <p className="text-[13px] font-semibold text-slate-700 truncate">{folder.name}</p>
-                            <p className="text-[11px] text-slate-400 md:hidden">{folder.document_count ?? 0} docs</p>
+                            {search && parentPath(folder) && (
+                              <p className="text-[11px] text-slate-400 truncate">in {parentPath(folder)}</p>
+                            )}
                           </div>
                         </div>
                       </td>
-                      <td className="px-3 py-3">
-                        <span className="text-[13px] font-medium text-slate-600">{folder.document_count ?? 0}</span>
-                        <span className="text-[11px] text-slate-400 ml-1">docs</span>
+                      <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          onClick={() => onViewDocuments(folder)}
+                          title="View documents in this folder"
+                          className="flex items-center gap-1 rounded-md px-1.5 py-0.5 -mx-1.5 hover:bg-slate-100 transition-colors"
+                        >
+                          <span className="text-[13px] font-medium text-slate-600">{folder.document_count ?? 0}</span>
+                          <span className="text-[11px] text-slate-400">docs</span>
+                        </button>
+                      </td>
+                      <td className="px-3 py-3 hidden sm:table-cell">
+                        <span className="text-[12px] text-slate-500 flex items-center gap-1.5">
+                          <FolderTree className="w-3.5 h-3.5 text-slate-300" /> {subfolderCount(folder)}
+                        </span>
                       </td>
                       <td className="px-3 py-3 hidden md:table-cell">
                         <span className="text-[12px] text-slate-500 flex items-center gap-1.5">
@@ -278,7 +361,7 @@ export default function FolderListPage({
               <div
                 key={folder.id}
                 className="group relative bg-white border border-slate-200 rounded-xl p-5 hover:shadow-lg hover:shadow-slate-200/50 hover:border-slate-300 transition-all cursor-pointer"
-                onClick={() => onOpenFolder(folder)}
+                onClick={() => onNavigate(folder.id)}
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${colors.bg}`}>
@@ -288,8 +371,20 @@ export default function FolderListPage({
                 </div>
 
                 <h3 className="text-[14px] font-bold text-slate-800 truncate">{folder.name}</h3>
-                <p className="text-[12px] text-slate-400 mt-1">
-                  {folder.document_count ?? 0} {(folder.document_count ?? 0) === 1 ? 'document' : 'documents'}
+                {search && parentPath(folder) && (
+                  <p className="text-[11px] text-slate-400 truncate mt-0.5">in {parentPath(folder)}</p>
+                )}
+                <p className="text-[12px] text-slate-400 mt-1 flex items-center gap-1.5">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onViewDocuments(folder); }}
+                    className="hover:text-slate-700 hover:underline transition-colors"
+                  >
+                    {folder.document_count ?? 0} {(folder.document_count ?? 0) === 1 ? 'document' : 'documents'}
+                  </button>
+                  <span>·</span>
+                  <span>
+                    {subfolderCount(folder)} {subfolderCount(folder) === 1 ? 'subfolder' : 'subfolders'}
+                  </span>
                 </p>
 
                 <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-50">
@@ -301,7 +396,7 @@ export default function FolderListPage({
                     </span>
                   </div>
                   <button
-                    onClick={(e) => { e.stopPropagation(); onOpenFolder(folder); }}
+                    onClick={(e) => { e.stopPropagation(); onNavigate(folder.id); }}
                     className="flex items-center gap-1 text-[12px] font-semibold text-slate-500 hover:text-slate-800 transition-colors"
                   >
                     Open
