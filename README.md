@@ -483,7 +483,7 @@ Base URL: `http://localhost:8000`. All endpoints except the CSRF cookie and `/up
 
 ## Features intentionally not implemented
 
-These were left out on purpose, given the 24-hour time limit and the brief's preference for a smaller, well-built app:
+These were left out on purpose, given the 48-hour time limit and the brief's preference for a smaller, well-built app:
 
 | Feature | Reason |
 |---|---|
