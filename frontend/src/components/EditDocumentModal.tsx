@@ -21,8 +21,17 @@ export default function EditDocumentModal({ open, onClose, document: doc, onSave
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Re-seed the form whenever a different document is opened.
-  const formKey = doc?.uuid ?? 'none';
+  // The modal stays mounted, so re-seed the form whenever it opens for a document.
+  const seedKey = open && doc ? doc.uuid : null;
+  const [seededFor, setSeededFor] = useState<string | null>(seedKey);
+  if (seedKey !== seededFor) {
+    setSeededFor(seedKey);
+    if (doc && seedKey) {
+      setTitle(doc.title);
+      setDescription(doc.description ?? '');
+      setError(null);
+    }
+  }
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -72,7 +81,7 @@ export default function EditDocumentModal({ open, onClose, document: doc, onSave
         </>
       }
     >
-      <form onSubmit={handleSubmit} key={formKey} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-5">
         {error && (
           <div className="flex items-start gap-2.5 px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl">
             <AlertCircle className="w-4 h-4 text-rose-500 mt-0.5 shrink-0" />
@@ -86,7 +95,7 @@ export default function EditDocumentModal({ open, onClose, document: doc, onSave
             type="text"
             required
             autoFocus
-            defaultValue={doc?.title ?? title}
+            value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="w-full px-4 py-2.5 text-[14px] bg-white border border-slate-200 rounded-xl placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 outline-none transition-all"
           />
@@ -95,7 +104,7 @@ export default function EditDocumentModal({ open, onClose, document: doc, onSave
         <div>
           <label className="block text-[13px] font-semibold text-slate-700 mb-1.5">Description</label>
           <textarea
-            defaultValue={doc?.description ?? description}
+            value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
             placeholder="Optional notes about this document"
