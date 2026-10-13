@@ -128,14 +128,14 @@ export default function FolderAccessModal({ open, onClose, folder }: FolderAcces
         <>
           <button
             onClick={onClose}
-            className="px-4 py-2.5 text-[14px] font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+            className="px-4 py-2.5 text-[14px] font-semibold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={saving || loading}
-            className="flex items-center gap-2 px-4 py-2.5 text-[14px] font-semibold text-white bg-slate-800 hover:bg-slate-900 rounded-lg transition-all shadow-sm active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2.5 text-[14px] font-semibold text-white bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 rounded-lg transition-all shadow-sm active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {saving ? (
               <>
@@ -154,9 +154,9 @@ export default function FolderAccessModal({ open, onClose, folder }: FolderAcces
     >
       <div className="space-y-4">
         {error && (
-          <div className="flex items-start gap-2.5 px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl">
+          <div className="flex items-start gap-2.5 px-4 py-3 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 rounded-xl">
             <AlertCircle className="w-4 h-4 text-rose-500 mt-0.5 shrink-0" />
-            <p className="text-[13px] text-rose-700 font-medium">{error}</p>
+            <p className="text-[13px] text-rose-700 dark:text-rose-400 font-medium">{error}</p>
           </div>
         )}
 
@@ -172,12 +172,12 @@ export default function FolderAccessModal({ open, onClose, folder }: FolderAcces
                 const cfg = accessConfig[key];
                 const Icon = cfg.icon;
                 return (
-                  <div key={key} className="flex items-center gap-2.5 p-3 bg-slate-50 rounded-xl border border-slate-100">
-                    <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shrink-0 border border-slate-200">
-                      <Icon className="w-4 h-4 text-slate-500" />
+                  <div key={key} className="flex items-center gap-2.5 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+                    <div className="w-8 h-8 rounded-lg bg-white dark:bg-slate-900 flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700">
+                      <Icon className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                     </div>
                     <div>
-                      <p className="text-lg font-bold text-slate-700 leading-none">{stats[key]}</p>
+                      <p className="text-lg font-bold text-slate-700 dark:text-slate-200 leading-none">{stats[key]}</p>
                       <p className="text-[10px] text-slate-400 font-medium mt-0.5">{cfg.label}</p>
                     </div>
                   </div>
@@ -193,15 +193,15 @@ export default function FolderAccessModal({ open, onClose, folder }: FolderAcces
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search users..."
-                className="w-full pl-9 pr-4 py-2.5 text-[13px] bg-slate-50 border border-slate-200 rounded-lg placeholder:text-slate-400 focus:bg-white focus:border-slate-300 focus:ring-2 focus:ring-slate-100 outline-none transition-all"
+                className="w-full pl-9 pr-4 py-2.5 text-[13px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg placeholder:text-slate-400 focus:bg-white dark:focus:bg-slate-900 focus:border-slate-300 dark:focus:border-slate-600 focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 outline-none transition-all"
               />
             </div>
 
             {/* User list */}
-            <div className="border border-slate-100 rounded-xl overflow-hidden max-h-72 overflow-y-auto scrollbar-thin">
+            <div className="border border-slate-100 dark:border-slate-800 rounded-xl overflow-hidden max-h-72 overflow-y-auto scrollbar-thin">
               {filtered.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-10 text-center">
-                  <UsersIcon className="w-8 h-8 text-slate-300 mb-2" />
+                  <UsersIcon className="w-8 h-8 text-slate-300 dark:text-slate-600 mb-2" />
                   <p className="text-[13px] text-slate-400">No users found matching "{search}"</p>
                 </div>
               )}
@@ -210,8 +210,8 @@ export default function FolderAccessModal({ open, onClose, folder }: FolderAcces
                 return (
                   <div
                     key={user.id}
-                    className={`flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors ${
-                      index !== filtered.length - 1 ? 'border-b border-slate-50' : ''
+                    className={`flex items-center gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${
+                      index !== filtered.length - 1 ? 'border-b border-slate-50 dark:border-slate-800' : ''
                     }`}
                   >
                     <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 ${
@@ -222,9 +222,9 @@ export default function FolderAccessModal({ open, onClose, folder }: FolderAcces
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="text-[13px] font-semibold text-slate-700 truncate">{user.name}</p>
+                        <p className="text-[13px] font-semibold text-slate-700 dark:text-slate-200 truncate">{user.name}</p>
                         {user.role === 'admin' && (
-                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-violet-100 text-violet-700 shrink-0">
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-400 shrink-0">
                             ADMIN
                           </span>
                         )}
@@ -244,7 +244,7 @@ export default function FolderAccessModal({ open, onClose, folder }: FolderAcces
                             onClick={() => toggle(user.id, key)}
                             disabled={user.role === 'admin'}
                             className={`flex items-center gap-1 px-2 py-1.5 text-[10px] font-semibold rounded-md transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
-                              active ? cfg.activeBg : 'bg-slate-50 text-slate-400 hover:bg-slate-100'
+                              active ? cfg.activeBg : 'bg-slate-50 dark:bg-slate-800/50 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                             }`}
                             title={user.role === 'admin' ? 'Admins always have full access' : `${active ? 'Revoke' : 'Grant'} ${cfg.label.toLowerCase()} access`}
                           >

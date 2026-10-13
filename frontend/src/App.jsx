@@ -12,6 +12,7 @@ import AppLayout from './layouts/AppLayout';
 import RequireAuth from './routes/RequireAuth';
 import RequireGuest from './routes/RequireGuest';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 function DashboardPage() {
   const { user } = useAuth();
@@ -47,11 +48,13 @@ function AppRoutes() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
-    </BrowserRouter>
+    <ThemeProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
 

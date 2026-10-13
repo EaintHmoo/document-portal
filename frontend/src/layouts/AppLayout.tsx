@@ -22,7 +22,7 @@ export default function AppLayout() {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950">
       <Sidebar
         role={user.role}
         user={sidebarUser}
@@ -44,7 +44,7 @@ export default function AppLayout() {
           <Outlet />
         </main>
 
-        <footer className="px-6 py-4 border-t border-slate-200 bg-white">
+        <footer className="px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2 max-w-7xl mx-auto">
             <p className="text-[11px] text-slate-400">Internal Document Portal — Secure Access Only</p>
             <p className="text-[11px] text-slate-400">v1.0.0 · © 2025 Company Inc.</p>

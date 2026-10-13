@@ -116,14 +116,14 @@ export default function UploadDocumentModal({ open, onClose, folders, defaultFol
         <>
           <button
             onClick={handleClose}
-            className="px-4 py-2.5 text-[14px] font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+            className="px-4 py-2.5 text-[14px] font-semibold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
             disabled={!file || !title.trim() || !folderId || loading}
-            className="flex items-center gap-2 px-4 py-2.5 text-[14px] font-semibold text-white bg-slate-800 hover:bg-slate-900 rounded-lg transition-all shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2.5 text-[14px] font-semibold text-white bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 rounded-lg transition-all shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <>
@@ -142,9 +142,9 @@ export default function UploadDocumentModal({ open, onClose, folders, defaultFol
     >
       <form onSubmit={handleSubmit} className="space-y-5">
         {error && (
-          <div className="flex items-start gap-2.5 px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl">
+          <div className="flex items-start gap-2.5 px-4 py-3 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 rounded-xl">
             <AlertCircle className="w-4 h-4 text-rose-500 mt-0.5 shrink-0" />
-            <p className="text-[13px] text-rose-700 font-medium">{error}</p>
+            <p className="text-[13px] text-rose-700 dark:text-rose-400 font-medium">{error}</p>
           </div>
         )}
 
@@ -160,10 +160,10 @@ export default function UploadDocumentModal({ open, onClose, folders, defaultFol
           }}
           className={`flex flex-col items-center justify-center gap-3 px-6 py-10 rounded-xl border-2 border-dashed cursor-pointer transition-all ${
             dragging
-              ? 'border-slate-400 bg-slate-50'
+              ? 'border-slate-400 dark:border-slate-500 bg-slate-50 dark:bg-slate-800/50'
               : file
-                ? 'border-emerald-300 bg-emerald-50/50'
-                : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                ? 'border-emerald-300 bg-emerald-50/50 dark:bg-emerald-500/10'
+                : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800/50'
           }`}
         >
           <input
@@ -175,11 +175,11 @@ export default function UploadDocumentModal({ open, onClose, folders, defaultFol
           />
           {file ? (
             <>
-              <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
-                <Check className="w-6 h-6 text-emerald-600" />
+              <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
+                <Check className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
               </div>
               <div className="text-center">
-                <p className="text-[14px] font-semibold text-slate-700">{file.name}</p>
+                <p className="text-[14px] font-semibold text-slate-700 dark:text-slate-200">{file.name}</p>
                 <p className="text-[12px] text-slate-400 mt-0.5">{formatSize(file.size)}</p>
               </div>
               <button
@@ -193,12 +193,12 @@ export default function UploadDocumentModal({ open, onClose, folders, defaultFol
             </>
           ) : (
             <>
-              <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
                 <UploadCloud className="w-6 h-6 text-slate-400" />
               </div>
               <div className="text-center">
-                <p className="text-[14px] font-semibold text-slate-600">
-                  Drag and drop or <span className="text-slate-800 underline">browse</span>
+                <p className="text-[14px] font-semibold text-slate-600 dark:text-slate-300">
+                  Drag and drop or <span className="text-slate-800 dark:text-slate-100 underline">browse</span>
                 </p>
                 <p className="text-[12px] text-slate-400 mt-1">PDF, DOC, XLS, PPT up to 20 MB</p>
               </div>
@@ -208,36 +208,36 @@ export default function UploadDocumentModal({ open, onClose, folders, defaultFol
 
         {/* Title */}
         <div>
-          <label className="block text-[13px] font-semibold text-slate-700 mb-1.5">Title</label>
+          <label className="block text-[13px] font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Title</label>
           <input
             type="text"
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Document title"
-            className="w-full px-4 py-2.5 text-[14px] bg-white border border-slate-200 rounded-xl placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 outline-none transition-all"
+            className="w-full px-4 py-2.5 text-[14px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl placeholder:text-slate-400 focus:border-slate-400 dark:focus:border-slate-500 focus:ring-4 focus:ring-slate-100 dark:focus:ring-slate-800 outline-none transition-all"
           />
         </div>
 
         {/* Description */}
         <div>
-          <label className="block text-[13px] font-semibold text-slate-700 mb-1.5">Description</label>
+          <label className="block text-[13px] font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Description</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Optional notes about this document"
             rows={2}
-            className="w-full px-4 py-2.5 text-[14px] bg-white border border-slate-200 rounded-xl placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 outline-none transition-all resize-none"
+            className="w-full px-4 py-2.5 text-[14px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl placeholder:text-slate-400 focus:border-slate-400 dark:focus:border-slate-500 focus:ring-4 focus:ring-slate-100 dark:focus:ring-slate-800 outline-none transition-all resize-none"
           />
         </div>
 
         {/* Folder selection */}
         <div>
-          <label className="block text-[13px] font-semibold text-slate-700 mb-1.5">Destination Folder</label>
+          <label className="block text-[13px] font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Destination Folder</label>
           <select
             value={folderId}
             onChange={(e) => setFolderId(Number(e.target.value))}
-            className="w-full px-4 py-2.5 text-[14px] bg-white border border-slate-200 rounded-xl focus:border-slate-400 focus:ring-4 focus:ring-slate-100 outline-none transition-all cursor-pointer"
+            className="w-full px-4 py-2.5 text-[14px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:border-slate-400 dark:focus:border-slate-500 focus:ring-4 focus:ring-slate-100 dark:focus:ring-slate-800 outline-none transition-all cursor-pointer"
           >
             {folders.length === 0 && <option value={0}>No folders available</option>}
             {folders.map((f) => (

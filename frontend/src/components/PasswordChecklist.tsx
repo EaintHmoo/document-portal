@@ -11,12 +11,12 @@ export default function PasswordChecklist({ password }: { password: string }) {
         <div key={check.label} className="flex items-center gap-2">
           <span
             className={`flex items-center justify-center w-4 h-4 rounded-full transition-colors ${
-              check.valid ? 'bg-emerald-500' : 'bg-slate-200'
+              check.valid ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-700'
             }`}
           >
             <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
           </span>
-          <span className={`text-[11px] font-medium ${check.valid ? 'text-emerald-600' : 'text-slate-400'}`}>
+          <span className={`text-[11px] font-medium ${check.valid ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}`}>
             {check.label}
           </span>
         </div>

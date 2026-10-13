@@ -80,22 +80,22 @@ export default function DocumentDetailModal({
       footer={
         <button
           onClick={onClose}
-          className="px-4 py-2.5 text-[14px] font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+          className="px-4 py-2.5 text-[14px] font-semibold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
         >
           Close
         </button>
       }
     >
       <div className="space-y-4">
-        {doc.description && <p className="text-[13px] text-slate-500">{doc.description}</p>}
+        {doc.description && <p className="text-[13px] text-slate-500 dark:text-slate-400">{doc.description}</p>}
 
         {/* Upload new version */}
         {doc.can_edit && (
-          <div className="p-4 bg-slate-50 border border-dashed border-slate-200 rounded-xl space-y-2.5">
+          <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border border-dashed border-slate-200 dark:border-slate-700 rounded-xl space-y-2.5">
             {uploadError && (
-              <div className="flex items-start gap-2 px-3 py-2 bg-rose-50 border border-rose-200 rounded-lg">
+              <div className="flex items-start gap-2 px-3 py-2 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 rounded-lg">
                 <AlertCircle className="w-4 h-4 text-rose-500 mt-0.5 shrink-0" />
-                <p className="text-[12px] text-rose-700 font-medium">{uploadError}</p>
+                <p className="text-[12px] text-rose-700 dark:text-rose-400 font-medium">{uploadError}</p>
               </div>
             )}
             <input
@@ -103,7 +103,7 @@ export default function DocumentDetailModal({
               value={changeNote}
               onChange={(e) => setChangeNote(e.target.value)}
               placeholder="What changed in this version? (optional)"
-              className="w-full px-3 py-2 text-[13px] bg-white border border-slate-200 rounded-lg placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100 outline-none transition-all"
+              className="w-full px-3 py-2 text-[13px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg placeholder:text-slate-400 focus:border-slate-400 dark:focus:border-slate-500 focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 outline-none transition-all"
             />
             <input
               ref={inputRef}
@@ -116,7 +116,7 @@ export default function DocumentDetailModal({
               type="button"
               onClick={() => inputRef.current?.click()}
               disabled={uploading}
-              className="w-full flex items-center justify-center gap-2 px-3 py-2 text-[13px] font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 text-[13px] font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors disabled:opacity-50"
             >
               {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UploadCloud className="w-4 h-4" />}
               {uploading ? 'Uploading...' : 'Upload New Version'}
@@ -125,15 +125,15 @@ export default function DocumentDetailModal({
         )}
 
         {deleteError && (
-          <div className="flex items-start gap-2.5 px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl">
+          <div className="flex items-start gap-2.5 px-4 py-3 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 rounded-xl">
             <AlertCircle className="w-4 h-4 text-rose-500 mt-0.5 shrink-0" />
-            <p className="text-[13px] text-rose-700 font-medium">{deleteError}</p>
+            <p className="text-[13px] text-rose-700 dark:text-rose-400 font-medium">{deleteError}</p>
           </div>
         )}
 
         {/* Version history */}
         <div>
-          <p className="text-[12px] font-semibold text-slate-500 uppercase tracking-wider mb-2">
+          <p className="text-[12px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
             Version History ({versions.length})
           </p>
 
@@ -142,23 +142,23 @@ export default function DocumentDetailModal({
               <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />
             </div>
           ) : (
-            <div className="border border-slate-100 rounded-xl overflow-hidden max-h-80 overflow-y-auto scrollbar-thin">
+            <div className="border border-slate-100 dark:border-slate-800 rounded-xl overflow-hidden max-h-80 overflow-y-auto scrollbar-thin">
               {versions.map((version, index) => {
                 const fc = fileTypeColors[version.extension] ?? defaultFileColor;
                 const isCurrent = version.id === doc.current_version?.id;
                 return (
                   <div
                     key={version.id}
-                    className={`flex items-center gap-3 px-4 py-3 ${index !== versions.length - 1 ? 'border-b border-slate-50' : ''}`}
+                    className={`flex items-center gap-3 px-4 py-3 ${index !== versions.length - 1 ? 'border-b border-slate-50 dark:border-slate-800' : ''}`}
                   >
                     <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${fc.bg} ${fc.text}`}>
                       <FileText className="w-4 h-4" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="text-[13px] font-semibold text-slate-700">v{version.version_number}</p>
+                        <p className="text-[13px] font-semibold text-slate-700 dark:text-slate-200">v{version.version_number}</p>
                         {isCurrent && (
-                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700">
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400">
                             CURRENT
                           </span>
                         )}
@@ -167,14 +167,14 @@ export default function DocumentDetailModal({
                         {version.author?.name ?? 'Unknown'} · {formatDate(version.created_at)} · {formatBytes(version.size_bytes)}
                       </p>
                       {version.change_note && (
-                        <p className="text-[11px] text-slate-500 italic mt-0.5 truncate">"{version.change_note}"</p>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 italic mt-0.5 truncate">"{version.change_note}"</p>
                       )}
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                       <button
                         onClick={() => onDownloadVersion(version)}
                         title="Download this version"
-                        className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-all"
+                        className="p-1.5 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-md transition-all"
                       >
                         <Download className="w-4 h-4" />
                       </button>
@@ -183,7 +183,7 @@ export default function DocumentDetailModal({
                           onClick={() => handleDelete(version)}
                           disabled={!canDeleteVersions || deletingId === version.id}
                           title={versions.length <= 1 ? "A document must keep at least one version" : 'Delete this version'}
-                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-md transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                         >
                           {deletingId === version.id ? (
                             <Loader2 className="w-4 h-4 animate-spin" />

@@ -49,7 +49,7 @@ export default function DeleteFolderModal({ open, onClose, folder, onConfirm }: 
         <>
           <button
             onClick={handleClose}
-            className="px-4 py-2.5 text-[14px] font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+            className="px-4 py-2.5 text-[14px] font-semibold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
           >
             Cancel
           </button>
@@ -75,18 +75,18 @@ export default function DeleteFolderModal({ open, onClose, folder, onConfirm }: 
     >
       <div className="space-y-4">
         {error && (
-          <div className="flex items-start gap-2.5 px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl">
+          <div className="flex items-start gap-2.5 px-4 py-3 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 rounded-xl">
             <AlertCircle className="w-4 h-4 text-rose-500 mt-0.5 shrink-0" />
-            <p className="text-[13px] text-rose-700 font-medium">{error}</p>
+            <p className="text-[13px] text-rose-700 dark:text-rose-400 font-medium">{error}</p>
           </div>
         )}
 
         {/* Warning banner */}
-        <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+        <div className="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-xl">
           <AlertTriangle className="w-5 h-5 text-amber-500 mt-0.5 shrink-0" />
           <div>
-            <p className="text-[13px] font-semibold text-amber-800">Warning: Destructive Action</p>
-            <p className="text-[12px] text-amber-700 mt-1 leading-relaxed">
+            <p className="text-[13px] font-semibold text-amber-800 dark:text-amber-400">Warning: Destructive Action</p>
+            <p className="text-[12px] text-amber-700 dark:text-amber-400 mt-1 leading-relaxed">
               A folder can only be deleted once it's empty — if it still has documents, the server will
               reject this and you'll need to move or delete them first.
             </p>
@@ -94,26 +94,26 @@ export default function DeleteFolderModal({ open, onClose, folder, onConfirm }: 
         </div>
 
         {/* Folder info */}
-        <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl border border-slate-100">
-          <div className="w-10 h-10 rounded-lg bg-slate-200 flex items-center justify-center shrink-0">
-            <FolderOpen className="w-5 h-5 text-slate-500" />
+        <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+          <div className="w-10 h-10 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center shrink-0">
+            <FolderOpen className="w-5 h-5 text-slate-500 dark:text-slate-400" />
           </div>
           <div className="min-w-0">
-            <p className="text-[14px] font-semibold text-slate-700 truncate">{folder.name}</p>
+            <p className="text-[14px] font-semibold text-slate-700 dark:text-slate-200 truncate">{folder.name}</p>
             <p className="text-[12px] text-slate-400">{folder.document_count ?? 0} documents</p>
           </div>
         </div>
 
         {/* Confirmation checkbox */}
-        <label className="flex items-start gap-2.5 cursor-pointer select-none p-3 rounded-lg hover:bg-slate-50 transition-colors">
+        <label className="flex items-start gap-2.5 cursor-pointer select-none p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
           <input
             type="checkbox"
             checked={confirmed}
             onChange={(e) => setConfirmed(e.target.checked)}
-            className="w-4 h-4 rounded border-slate-300 text-rose-600 focus:ring-rose-300 mt-0.5"
+            className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-rose-600 dark:text-rose-400 focus:ring-rose-300 mt-0.5"
           />
-          <span className="text-[13px] text-slate-600 leading-relaxed">
-            I understand that <span className="font-semibold text-slate-800">{folder.name}</span> will be
+          <span className="text-[13px] text-slate-600 dark:text-slate-300 leading-relaxed">
+            I understand that <span className="font-semibold text-slate-800 dark:text-slate-100">{folder.name}</span> will be
             permanently deleted. This cannot be undone.
           </span>
         </label>

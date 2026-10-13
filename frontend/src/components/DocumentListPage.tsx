@@ -47,8 +47,8 @@ export default function DocumentListPage({
   const toggleDateSort = () => onSortChange(sort === 'newest' ? 'oldest' : 'newest');
 
   const SortIcon = ({ active, asc }: { active: boolean; asc: boolean }) => {
-    if (!active) return <ArrowUpDown className="w-3.5 h-3.5 text-slate-300" />;
-    return asc ? <ArrowUp className="w-3.5 h-3.5 text-slate-600" /> : <ArrowDown className="w-3.5 h-3.5 text-slate-600" />;
+    if (!active) return <ArrowUpDown className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600" />;
+    return asc ? <ArrowUp className="w-3.5 h-3.5 text-slate-600 dark:text-slate-300" /> : <ArrowDown className="w-3.5 h-3.5 text-slate-600 dark:text-slate-300" />;
   };
 
   const clearFilters = () => {
@@ -64,9 +64,9 @@ export default function DocumentListPage({
           <div className="flex items-center gap-2 text-[12px] text-slate-400 mb-1">
             <span>Dashboard</span>
             <ChevronRight className="w-3.5 h-3.5" />
-            <span className="text-slate-600 font-medium">Documents</span>
+            <span className="text-slate-600 dark:text-slate-300 font-medium">Documents</span>
           </div>
-          <h1 className="text-xl font-bold text-slate-800 tracking-tight">Document Management</h1>
+          <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Document Management</h1>
           <p className="text-[13px] text-slate-400 mt-0.5">
             {total} {total === 1 ? 'document' : 'documents'}
             {search && ` matching "${search}"`}
@@ -76,7 +76,7 @@ export default function DocumentListPage({
         {canUploadAnywhere && (
           <button
             onClick={onUpload}
-            className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold text-white bg-slate-800 hover:bg-slate-900 rounded-lg transition-all shadow-sm active:scale-[0.98]"
+            className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold text-white bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 rounded-lg transition-all shadow-sm active:scale-[0.98]"
           >
             <Upload className="w-4 h-4" />
             Upload
@@ -85,7 +85,7 @@ export default function DocumentListPage({
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-col gap-3 bg-white border border-slate-200 rounded-xl px-4 py-3">
+      <div className="flex flex-col gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3">
         <div className="flex items-center gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -94,7 +94,7 @@ export default function DocumentListPage({
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Search documents..."
-              className="w-full pl-9 pr-4 py-2 text-[13px] bg-slate-50 border border-slate-200 rounded-lg placeholder:text-slate-400 focus:bg-white focus:border-slate-300 focus:ring-2 focus:ring-slate-100 outline-none transition-all"
+              className="w-full pl-9 pr-4 py-2 text-[13px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg placeholder:text-slate-400 focus:bg-white dark:focus:bg-slate-900 focus:border-slate-300 dark:focus:border-slate-600 focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 outline-none transition-all"
             />
           </div>
 
@@ -103,7 +103,7 @@ export default function DocumentListPage({
             <select
               value={folderFilter}
               onChange={(e) => onFolderFilterChange(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-              className="px-3 py-2 text-[13px] font-medium bg-slate-50 border border-slate-200 rounded-lg text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-100 cursor-pointer"
+              className="px-3 py-2 text-[13px] font-medium bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 cursor-pointer"
             >
               <option value="all">All Folders</option>
               {folderOptions(folders).map((f) => (
@@ -117,7 +117,7 @@ export default function DocumentListPage({
             <select
               value={extensionFilter}
               onChange={(e) => onExtensionFilterChange(e.target.value)}
-              className="px-3 py-2 text-[13px] font-medium bg-slate-50 border border-slate-200 rounded-lg text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-100 cursor-pointer"
+              className="px-3 py-2 text-[13px] font-medium bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 cursor-pointer"
             >
               <option value="all">All Types</option>
               {SUPPORTED_EXTENSIONS.map((ext) => (
@@ -128,7 +128,7 @@ export default function DocumentListPage({
             {activeFilterCount > 0 && (
               <button
                 onClick={clearFilters}
-                className="flex items-center gap-1 px-2.5 py-2 text-[12px] font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg transition-colors"
+                className="flex items-center gap-1 px-2.5 py-2 text-[12px] font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 rounded-lg transition-colors"
               >
                 <X className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Clear</span>
@@ -140,18 +140,18 @@ export default function DocumentListPage({
 
       {/* Loading */}
       {loading && (
-        <div className="flex items-center justify-center py-20 bg-white border border-slate-200 rounded-xl">
-          <div className="w-6 h-6 border-2 border-slate-200 border-t-slate-600 rounded-full animate-spin" />
+        <div className="flex items-center justify-center py-20 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl">
+          <div className="w-6 h-6 border-2 border-slate-200 dark:border-slate-700 border-t-slate-600 rounded-full animate-spin" />
         </div>
       )}
 
       {/* Empty state */}
       {!loading && documents.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-20 text-center bg-white border border-slate-200 rounded-xl">
-          <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
-            <Inbox className="w-8 h-8 text-slate-300" />
+        <div className="flex flex-col items-center justify-center py-20 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl">
+          <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
+            <Inbox className="w-8 h-8 text-slate-300 dark:text-slate-600" />
           </div>
-          <h3 className="text-[15px] font-bold text-slate-700">No documents found</h3>
+          <h3 className="text-[15px] font-bold text-slate-700 dark:text-slate-200">No documents found</h3>
           <p className="text-[13px] text-slate-400 mt-1 max-w-sm">
             {search || activeFilterCount > 0
               ? 'No documents match your current search and filters. Try adjusting them.'
@@ -160,7 +160,7 @@ export default function DocumentListPage({
           {canUploadAnywhere && (
             <button
               onClick={onUpload}
-              className="mt-5 flex items-center gap-2 px-4 py-2 text-[13px] font-semibold text-white bg-slate-800 rounded-lg hover:bg-slate-900 transition-colors"
+              className="mt-5 flex items-center gap-2 px-4 py-2 text-[13px] font-semibold text-white bg-slate-800 dark:bg-slate-700 rounded-lg hover:bg-slate-900 dark:hover:bg-slate-600 transition-colors"
             >
               <Upload className="w-4 h-4" />
               Upload Document
@@ -172,26 +172,26 @@ export default function DocumentListPage({
       {/* Document table */}
       {!loading && documents.length > 0 && (
         <>
-          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50/50">
-                    <th className="text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider px-5 py-2.5">
-                      <button onClick={toggleNameSort} className="flex items-center gap-1.5 hover:text-slate-700 transition-colors">
+                  <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                    <th className="text-left text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-5 py-2.5">
+                      <button onClick={toggleNameSort} className="flex items-center gap-1.5 hover:text-slate-700 dark:hover:text-slate-200 transition-colors">
                         Document <SortIcon active={sort === 'name_asc' || sort === 'name_desc'} asc={sort === 'name_asc'} />
                       </button>
                     </th>
-                    <th className="text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider px-3 py-2.5">Type</th>
-                    <th className="text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider px-3 py-2.5 hidden md:table-cell">Folder</th>
-                    <th className="text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider px-3 py-2.5 hidden lg:table-cell">Size</th>
-                    <th className="text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider px-3 py-2.5 hidden lg:table-cell">Version</th>
-                    <th className="text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider px-3 py-2.5 hidden md:table-cell">
-                      <button onClick={toggleDateSort} className="flex items-center gap-1.5 hover:text-slate-700 transition-colors">
+                    <th className="text-left text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-3 py-2.5">Type</th>
+                    <th className="text-left text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-3 py-2.5 hidden md:table-cell">Folder</th>
+                    <th className="text-left text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-3 py-2.5 hidden lg:table-cell">Size</th>
+                    <th className="text-left text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-3 py-2.5 hidden lg:table-cell">Version</th>
+                    <th className="text-left text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-3 py-2.5 hidden md:table-cell">
+                      <button onClick={toggleDateSort} className="flex items-center gap-1.5 hover:text-slate-700 dark:hover:text-slate-200 transition-colors">
                         Date <SortIcon active={sort === 'newest' || sort === 'oldest'} asc={sort === 'oldest'} />
                       </button>
                     </th>
-                    <th className="text-right text-[11px] font-semibold text-slate-500 uppercase tracking-wider px-3 py-2.5">Actions</th>
+                    <th className="text-right text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-3 py-2.5">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -200,7 +200,7 @@ export default function DocumentListPage({
                     return (
                       <tr
                         key={doc.uuid}
-                        className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors group cursor-pointer"
+                        className="border-b border-slate-50 dark:border-slate-800 last:border-0 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group cursor-pointer"
                         onClick={() => onOpenDetail(doc)}
                       >
                         <td className="px-5 py-3">
@@ -209,7 +209,7 @@ export default function DocumentListPage({
                               <FileText className="w-4 h-4" />
                             </div>
                             <div className="min-w-0">
-                              <p className="text-[13px] font-semibold text-slate-700 truncate max-w-[220px]">{doc.title}</p>
+                              <p className="text-[13px] font-semibold text-slate-700 dark:text-slate-200 truncate max-w-[220px]">{doc.title}</p>
                               <p className="text-[11px] text-slate-400 md:hidden">{doc.folder?.name ?? '—'}</p>
                             </div>
                           </div>
@@ -220,24 +220,24 @@ export default function DocumentListPage({
                           </span>
                         </td>
                         <td className="px-3 py-3 hidden md:table-cell">
-                          <span className="text-[12px] text-slate-500 flex items-center gap-1.5">
-                            <Folder className="w-3.5 h-3.5 text-slate-300" />
+                          <span className="text-[12px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                            <Folder className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600" />
                             {doc.folder?.name ?? '—'}
                           </span>
                         </td>
-                        <td className="px-3 py-3 text-[12px] text-slate-500 hidden lg:table-cell">{formatBytes(doc.size_bytes)}</td>
+                        <td className="px-3 py-3 text-[12px] text-slate-500 dark:text-slate-400 hidden lg:table-cell">{formatBytes(doc.size_bytes)}</td>
                         <td className="px-3 py-3 hidden lg:table-cell">
-                          <span className="text-[11px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
+                          <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
                             v{doc.version_count}
                           </span>
                         </td>
-                        <td className="px-3 py-3 text-[12px] text-slate-500 whitespace-nowrap hidden md:table-cell">{formatDate(doc.created_at)}</td>
+                        <td className="px-3 py-3 text-[12px] text-slate-500 dark:text-slate-400 whitespace-nowrap hidden md:table-cell">{formatDate(doc.created_at)}</td>
                         <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
                           <div className="flex items-center justify-end gap-1.5">
                             <button
                               onClick={() => onDownload(doc)}
                               title="Download"
-                              className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-all"
+                              className="p-1.5 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-md transition-all"
                             >
                               <Download className="w-4 h-4" />
                             </button>
@@ -245,7 +245,7 @@ export default function DocumentListPage({
                               <button
                                 onClick={() => onEdit(doc)}
                                 title="Edit"
-                                className="flex items-center gap-1 px-2 py-1.5 text-[12px] font-semibold text-slate-500 bg-white border border-slate-200 rounded-md hover:bg-slate-50 hover:text-slate-700 transition-all"
+                                className="flex items-center gap-1 px-2 py-1.5 text-[12px] font-semibold text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-700 dark:hover:text-slate-200 transition-all"
                               >
                                 <Pencil className="w-3.5 h-3.5" />
                                 <span className="hidden xl:inline">Edit</span>
@@ -255,7 +255,7 @@ export default function DocumentListPage({
                               <button
                                 onClick={() => onDelete(doc)}
                                 title="Delete"
-                                className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-all"
+                                className="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-md transition-all"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -276,7 +276,7 @@ export default function DocumentListPage({
               <button
                 onClick={() => onPageChange(page - 1)}
                 disabled={page <= 1}
-                className="flex items-center gap-1 px-3 py-1.5 text-[13px] font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center gap-1 px-3 py-1.5 text-[13px] font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronLeft className="w-4 h-4" /> Previous
               </button>
@@ -284,7 +284,7 @@ export default function DocumentListPage({
               <button
                 onClick={() => onPageChange(page + 1)}
                 disabled={page >= lastPage}
-                className="flex items-center gap-1 px-3 py-1.5 text-[13px] font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center gap-1 px-3 py-1.5 text-[13px] font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 Next <ChevronRight className="w-4 h-4" />
               </button>

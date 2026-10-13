@@ -54,7 +54,7 @@ export default function Dashboard({ role }: DashboardProps) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center gap-3">
         <AlertCircle className="w-8 h-8 text-rose-400" />
-        <p className="text-[14px] font-semibold text-slate-700">Couldn't load the dashboard</p>
+        <p className="text-[14px] font-semibold text-slate-700 dark:text-slate-200">Couldn't load the dashboard</p>
         <p className="text-[13px] text-slate-400 max-w-sm">{error}</p>
       </div>
     );
@@ -68,7 +68,7 @@ export default function Dashboard({ role }: DashboardProps) {
       {/* Page header */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-slate-800 tracking-tight">
+          <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">
             {role === 'admin' ? 'Admin Dashboard' : 'My Dashboard'}
           </h1>
           <p className="text-[13px] text-slate-400 mt-0.5">
@@ -110,7 +110,7 @@ export default function Dashboard({ role }: DashboardProps) {
         <div>
           <div className="flex items-center justify-between mb-3">
             <div>
-              <h2 className="text-[15px] font-bold text-slate-800">Folders</h2>
+              <h2 className="text-[15px] font-bold text-slate-800 dark:text-slate-100">Folders</h2>
               <p className="text-[12px] text-slate-400 mt-0.5">Browse documents by category</p>
             </div>
           </div>

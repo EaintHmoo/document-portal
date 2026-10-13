@@ -176,7 +176,7 @@ export default function DocumentsPage() {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center gap-3">
         <AlertCircle className="w-8 h-8 text-rose-400" />
-        <p className="text-[14px] font-semibold text-slate-700">Couldn't load documents</p>
+        <p className="text-[14px] font-semibold text-slate-700 dark:text-slate-200">Couldn't load documents</p>
         <p className="text-[13px] text-slate-400 max-w-sm">{error}</p>
       </div>
     );

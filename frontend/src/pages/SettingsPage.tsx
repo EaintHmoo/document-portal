@@ -7,7 +7,7 @@ import PasswordChecklist from '../components/PasswordChecklist';
 import { isStrongPassword } from '../utils/password';
 
 const inputClass =
-  'w-full pl-10 pr-4 py-2.5 text-[14px] bg-white border border-slate-200 rounded-xl placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 outline-none transition-all';
+  'w-full pl-10 pr-4 py-2.5 text-[14px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl placeholder:text-slate-400 focus:border-slate-400 dark:focus:border-slate-500 focus:ring-4 focus:ring-slate-100 dark:focus:ring-slate-800 outline-none transition-all';
 
 function ChangePasswordCard() {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -55,33 +55,33 @@ function ChangePasswordCard() {
   };
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-5 max-w-lg">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-5 max-w-lg">
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+        <div className="w-9 h-9 rounded-lg bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
           <KeyRound className="w-[18px] h-[18px]" />
         </div>
         <div>
-          <h2 className="text-[14px] font-semibold text-slate-800">Change Password</h2>
+          <h2 className="text-[14px] font-semibold text-slate-800 dark:text-slate-100">Change Password</h2>
           <p className="text-[12px] text-slate-400">Other devices will be signed out after the change.</p>
         </div>
       </div>
 
       {error && (
-        <div className="mb-4 flex items-start gap-2.5 px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl">
+        <div className="mb-4 flex items-start gap-2.5 px-4 py-3 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 rounded-xl">
           <AlertCircle className="w-4 h-4 text-rose-500 mt-0.5 shrink-0" />
-          <p className="text-[13px] text-rose-700 font-medium">{error}</p>
+          <p className="text-[13px] text-rose-700 dark:text-rose-400 font-medium">{error}</p>
         </div>
       )}
       {success && (
-        <div className="mb-4 flex items-start gap-2.5 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
-          <p className="text-[13px] text-emerald-700 font-medium">{success}</p>
+        <div className="mb-4 flex items-start gap-2.5 px-4 py-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 rounded-xl">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 mt-0.5 shrink-0" />
+          <p className="text-[13px] text-emerald-700 dark:text-emerald-400 font-medium">{success}</p>
         </div>
       )}
 
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="current-password" className="block text-[13px] font-semibold text-slate-700 mb-1.5">
+          <label htmlFor="current-password" className="block text-[13px] font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
             Current Password
           </label>
           <div className="relative">
@@ -99,7 +99,7 @@ function ChangePasswordCard() {
         </div>
 
         <div>
-          <label htmlFor="settings-new-password" className="block text-[13px] font-semibold text-slate-700 mb-1.5">
+          <label htmlFor="settings-new-password" className="block text-[13px] font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
             New Password
           </label>
           <div className="relative">
@@ -118,7 +118,7 @@ function ChangePasswordCard() {
         </div>
 
         <div>
-          <label htmlFor="settings-confirm-password" className="block text-[13px] font-semibold text-slate-700 mb-1.5">
+          <label htmlFor="settings-confirm-password" className="block text-[13px] font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
             Confirm New Password
           </label>
           <div className="relative">
@@ -139,7 +139,7 @@ function ChangePasswordCard() {
           <button
             type="button"
             onClick={() => setShowPasswords(!showPasswords)}
-            className="flex items-center gap-1.5 text-[12px] font-medium text-slate-500 hover:text-slate-700 transition-colors"
+            className="flex items-center gap-1.5 text-[12px] font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
           >
             {showPasswords ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             {showPasswords ? 'Hide passwords' : 'Show passwords'}
@@ -147,7 +147,7 @@ function ChangePasswordCard() {
           <button
             type="submit"
             disabled={loading || !currentPassword || !password || !confirmPassword}
-            className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold text-white bg-slate-800 hover:bg-slate-900 rounded-lg transition-all shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold text-white bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 rounded-lg transition-all shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
             {loading ? 'Updating...' : 'Update Password'}
@@ -166,31 +166,31 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-bold text-slate-800 tracking-tight">Settings</h1>
+        <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Settings</h1>
         <p className="text-[13px] text-slate-400 mt-0.5">Your account details and security</p>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xl p-5 max-w-lg space-y-4">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-5 max-w-lg space-y-4">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-full flex items-center justify-center text-white text-sm font-bold bg-gradient-to-br from-slate-700 to-slate-900">
             {user.initials}
           </div>
           <div>
-            <p className="text-[14px] font-semibold text-slate-800">{user.name}</p>
+            <p className="text-[14px] font-semibold text-slate-800 dark:text-slate-100">{user.name}</p>
             <p className="text-[12px] text-slate-400 capitalize">{user.role}</p>
           </div>
         </div>
 
-        <div className="border-t border-slate-100 pt-4 space-y-3">
-          <div className="flex items-center gap-2.5 text-[13px] text-slate-600">
+        <div className="border-t border-slate-100 dark:border-slate-800 pt-4 space-y-3">
+          <div className="flex items-center gap-2.5 text-[13px] text-slate-600 dark:text-slate-300">
             <Mail className="w-4 h-4 text-slate-400" />
             {user.email}
           </div>
-          <div className="flex items-center gap-2.5 text-[13px] text-slate-600">
+          <div className="flex items-center gap-2.5 text-[13px] text-slate-600 dark:text-slate-300">
             <Shield className="w-4 h-4 text-slate-400" />
             <span className="capitalize">{user.role} access</span>
           </div>
-          <div className="flex items-center gap-2.5 text-[13px] text-slate-600">
+          <div className="flex items-center gap-2.5 text-[13px] text-slate-600 dark:text-slate-300">
             <UserIcon className="w-4 h-4 text-slate-400" />
             User ID #{user.id}
           </div>

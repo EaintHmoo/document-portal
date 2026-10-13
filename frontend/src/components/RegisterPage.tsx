@@ -78,18 +78,18 @@ export default function RegisterPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-6 py-12 bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center px-6 py-12 bg-slate-50 dark:bg-slate-950">
         <div className="w-full max-w-sm text-center">
-          <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto mb-5">
-            <Check className="w-8 h-8 text-emerald-600" strokeWidth={2.5} />
+          <div className="w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center mx-auto mb-5">
+            <Check className="w-8 h-8 text-emerald-600 dark:text-emerald-400" strokeWidth={2.5} />
           </div>
-          <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Account created!</h2>
-          <p className="text-[14px] text-slate-500 mt-2 leading-relaxed">
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Account created!</h2>
+          <p className="text-[14px] text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
             Your email is verified and your account is ready. You can now sign in with your email and password.
           </p>
           <Link
             to="/login"
-            className="mt-6 w-full flex items-center justify-center gap-2 px-4 py-3 text-[14px] font-semibold text-white bg-slate-800 hover:bg-slate-900 rounded-xl transition-all shadow-sm active:scale-[0.99]"
+            className="mt-6 w-full flex items-center justify-center gap-2 px-4 py-3 text-[14px] font-semibold text-white bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 rounded-xl transition-all shadow-sm active:scale-[0.99]"
           >
             Continue to Sign In
             <ArrowRight className="w-4 h-4" />
@@ -143,16 +143,16 @@ export default function RegisterPage() {
                   <span className="flex items-center justify-center w-7 h-7 rounded-full bg-white/10 border border-white/15 text-[12px] font-bold">
                     {item.step}
                   </span>
-                  <span className="text-[13px] text-slate-300">{item.text}</span>
+                  <span className="text-[13px] text-slate-300 dark:text-slate-600">{item.text}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Bottom */}
-          <div className="text-[13px] text-slate-500">
+          <div className="text-[13px] text-slate-500 dark:text-slate-400">
             Already have an account?{' '}
-            <Link to="/login" className="font-semibold text-slate-300 hover:text-white transition-colors">
+            <Link to="/login" className="font-semibold text-slate-300 dark:text-slate-600 hover:text-white transition-colors">
               Sign in here
             </Link>
           </div>
@@ -160,25 +160,25 @@ export default function RegisterPage() {
       </div>
 
       {/* Right form panel */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 sm:px-12 bg-slate-50">
+      <div className="flex-1 flex items-center justify-center px-6 py-12 sm:px-12 bg-slate-50 dark:bg-slate-950">
         <div className="w-full max-w-sm">
           {/* Mobile logo */}
           <div className="flex lg:hidden items-center gap-3 mb-8">
-            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-slate-800 to-slate-900">
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 dark:from-slate-700 dark:to-slate-800 dark:ring-1 dark:ring-white/10">
               <Shield className="w-5 h-5 text-white" strokeWidth={2.2} />
             </div>
             <div>
-              <h1 className="text-[15px] font-bold text-slate-800">DocPortal</h1>
+              <h1 className="text-[15px] font-bold text-slate-800 dark:text-slate-100">DocPortal</h1>
               <p className="text-[11px] text-slate-400">Internal Document Portal</p>
             </div>
           </div>
 
           {/* Header */}
           <div className="mb-7">
-            <h2 className="text-2xl font-bold text-slate-800 tracking-tight">
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">
               {step === 'details' ? 'Create your account' : 'Verify your email'}
             </h2>
-            <p className="text-[14px] text-slate-500 mt-1.5">
+            <p className="text-[14px] text-slate-500 dark:text-slate-400 mt-1.5">
               {step === 'details'
                 ? "Get started with your team's document portal"
                 : 'One last step: confirm this email address belongs to you'}
@@ -187,9 +187,9 @@ export default function RegisterPage() {
 
           {/* Error alert */}
           {error && (
-            <div className="mb-5 flex items-start gap-2.5 px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl">
+            <div className="mb-5 flex items-start gap-2.5 px-4 py-3 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 rounded-xl">
               <AlertCircle className="w-4 h-4 text-rose-500 mt-0.5 shrink-0" />
-              <p className="text-[13px] text-rose-700 font-medium">{error}</p>
+              <p className="text-[13px] text-rose-700 dark:text-rose-400 font-medium">{error}</p>
             </div>
           )}
 
@@ -207,7 +207,7 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={loading || otp.length !== 6}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 text-[14px] font-semibold text-white bg-slate-800 hover:bg-slate-900 rounded-xl transition-all shadow-sm active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 text-[14px] font-semibold text-white bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 rounded-xl transition-all shadow-sm active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <>
@@ -225,7 +225,7 @@ export default function RegisterPage() {
               <button
                 type="button"
                 onClick={() => { setStep('details'); setError(null); }}
-                className="w-full flex items-center justify-center gap-1.5 text-[13px] font-medium text-slate-500 hover:text-slate-700 transition-colors"
+                className="w-full flex items-center justify-center gap-1.5 text-[13px] font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back to edit your details
@@ -238,7 +238,7 @@ export default function RegisterPage() {
           <form className="space-y-4" onSubmit={handleDetailsSubmit}>
             {/* Name */}
             <div>
-              <label className="block text-[13px] font-semibold text-slate-700 mb-1.5">Full Name</label>
+              <label className="block text-[13px] font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Full Name</label>
               <div className="relative">
                 <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-slate-400" />
                 <input
@@ -248,14 +248,14 @@ export default function RegisterPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="John Smith"
-                  className="w-full pl-11 pr-4 py-3 text-[14px] bg-white border border-slate-200 rounded-xl placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 outline-none transition-all"
+                  className="w-full pl-11 pr-4 py-3 text-[14px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl placeholder:text-slate-400 focus:border-slate-400 dark:focus:border-slate-500 focus:ring-4 focus:ring-slate-100 dark:focus:ring-slate-800 outline-none transition-all"
                 />
               </div>
             </div>
 
             {/* Email */}
             <div>
-              <label className="block text-[13px] font-semibold text-slate-700 mb-1.5">Email Address</label>
+              <label className="block text-[13px] font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Email Address</label>
               <div className="relative">
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-slate-400" />
                 <input
@@ -265,14 +265,14 @@ export default function RegisterPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@company.com"
-                  className="w-full pl-11 pr-4 py-3 text-[14px] bg-white border border-slate-200 rounded-xl placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 outline-none transition-all"
+                  className="w-full pl-11 pr-4 py-3 text-[14px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl placeholder:text-slate-400 focus:border-slate-400 dark:focus:border-slate-500 focus:ring-4 focus:ring-slate-100 dark:focus:ring-slate-800 outline-none transition-all"
                 />
               </div>
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-[13px] font-semibold text-slate-700 mb-1.5">Password</label>
+              <label className="block text-[13px] font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Password</label>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-slate-400" />
                 <input
@@ -282,12 +282,12 @@ export default function RegisterPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Create a strong password"
-                  className="w-full pl-11 pr-12 py-3 text-[14px] bg-white border border-slate-200 rounded-xl placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 outline-none transition-all"
+                  className="w-full pl-11 pr-12 py-3 text-[14px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl placeholder:text-slate-400 focus:border-slate-400 dark:focus:border-slate-500 focus:ring-4 focus:ring-slate-100 dark:focus:ring-slate-800 outline-none transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-[18px] h-[18px]" /> : <Eye className="w-[18px] h-[18px]" />}
                 </button>
@@ -299,7 +299,7 @@ export default function RegisterPage() {
 
             {/* Confirm password */}
             <div>
-              <label className="block text-[13px] font-semibold text-slate-700 mb-1.5">Confirm Password</label>
+              <label className="block text-[13px] font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Confirm Password</label>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-slate-400" />
                 <input
@@ -309,18 +309,18 @@ export default function RegisterPage() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Re-enter your password"
-                  className="w-full pl-11 pr-4 py-3 text-[14px] bg-white border border-slate-200 rounded-xl placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 outline-none transition-all"
+                  className="w-full pl-11 pr-4 py-3 text-[14px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl placeholder:text-slate-400 focus:border-slate-400 dark:focus:border-slate-500 focus:ring-4 focus:ring-slate-100 dark:focus:ring-slate-800 outline-none transition-all"
                 />
               </div>
             </div>
 
             {/* Terms */}
             <label className="flex items-start gap-2 cursor-pointer select-none pt-1">
-              <input type="checkbox" required className="w-4 h-4 rounded border-slate-300 text-slate-800 focus:ring-slate-300 mt-0.5" />
-              <span className="text-[12px] text-slate-600 leading-relaxed">
+              <input type="checkbox" required className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-100 focus:ring-slate-300 dark:focus:ring-slate-600 mt-0.5" />
+              <span className="text-[12px] text-slate-600 dark:text-slate-300 leading-relaxed">
                 I agree to the{' '}
-                <span className="font-semibold text-slate-700">Terms of Service</span> and{' '}
-                <span className="font-semibold text-slate-700">Privacy Policy</span>
+                <span className="font-semibold text-slate-700 dark:text-slate-200">Terms of Service</span> and{' '}
+                <span className="font-semibold text-slate-700 dark:text-slate-200">Privacy Policy</span>
               </span>
             </label>
 
@@ -328,7 +328,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 text-[14px] font-semibold text-white bg-slate-800 hover:bg-slate-900 rounded-xl transition-all shadow-sm active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 text-[14px] font-semibold text-white bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 rounded-xl transition-all shadow-sm active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <>
@@ -346,11 +346,11 @@ export default function RegisterPage() {
           )}
 
           {/* Switch to login */}
-          <p className="mt-6 text-center text-[13px] text-slate-500">
+          <p className="mt-6 text-center text-[13px] text-slate-500 dark:text-slate-400">
             Already have an account?{' '}
             <Link
               to="/login"
-              className="font-semibold text-slate-800 hover:text-slate-900 underline underline-offset-2 transition-colors"
+              className="font-semibold text-slate-800 dark:text-slate-100 hover:text-slate-900 dark:hover:text-slate-100 underline underline-offset-2 transition-colors"
             >
               Sign in
             </Link>
